@@ -38,7 +38,7 @@ services:
   pulse-ingest:
     build:
       context: . # Use the project root as context
-      dockerfile: ./services/pulse-ingest/Dockerfile # Specify path to Dockerfile
+      dockerfile: ./services/pulse-ingest/dockerfile # Specify path to Dockerfile
     container_name: pulse-ingest
     ports:
       - "8000:8000"
@@ -50,7 +50,7 @@ services:
   pulse-content-api:
     build:
       context: . # Use the project root as context
-      dockerfile: ./services/pulse-content-api/Dockerfile # Specify path to Dockerfile
+      dockerfile: ./services/pulse-content-api/dockerfile # Specify path to Dockerfile
     container_name: pulse-content-api
     ports:
       - "8001:8001"
