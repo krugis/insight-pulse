@@ -59,12 +59,31 @@ class LinkedInAdapter(SocialMediaAdapter):
 
     def _map_to_standard_post(self, post: Dict[str, Any]) -> StandardPost:
         """Maps a single post from the Apify format to our internal StandardPost model."""
-        author = post.get("author", {})
+        # Safely access nested dictionaries
+        author_data = post.get("author", {})
+        engagement_data = post.get("engagement", {})
+        
+        # Create the nested models
+        author_details = AuthorDetails(
+            id=author_data.get("publicIdentifier", "unknown"),
+            name=author_data.get("name", "Unknown Author"),
+            info=author_data.get("info"),
+            url=author_data.get("linkedinUrl")
+        )
+        
+        engagement_metrics = EngagementMetrics(
+            likes=engagement_data.get("likes", 0),
+            comments=engagement_data.get("comments", 0),
+            shares=engagement_data.get("shares", 0)
+        )
+        
+        # Create the main StandardPost object
         return StandardPost(
             source="linkedin",
             post_id=post.get("id"),
-            author_id=author.get("publicIdentifier", "unknown"),
-            content=post.get("content", ""),
             post_url=post.get("linkedinUrl"),
-            published_at=post.get("postedAt", {}).get("date")
+            content=post.get("content", ""),
+            published_at=post.get("postedAt", {}).get("date"),
+            author=author_details,
+            engagement=engagement_metrics
         )
