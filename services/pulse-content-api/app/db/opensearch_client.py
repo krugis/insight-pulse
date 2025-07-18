@@ -21,7 +21,7 @@ async def create_index_if_not_exists():
     Creates the 'posts' index in OpenSearch if it doesn't already exist.
     Retries connection on failure to handle startup race condition.
     """
-    retries = 10
+    retries = 20
     while retries > 0:
         try:
             if not client.indices.exists(index=POSTS_INDEX_NAME):
