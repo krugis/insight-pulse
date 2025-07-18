@@ -1,17 +1,18 @@
-# Use an official Python runtime as a parent image
 FROM python:3.11-slim
-
-# Set the working directory in the container
 WORKDIR /code
 
-# Copy the requirements file into the container at /code
-COPY ./requirements.txt /code/requirements.txt
-
-# Install any needed packages specified in requirements.txt
+# Copy requirements file for the specific service
+COPY ./services/pulse-ingest/requirements.txt /code/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
-# Copy the app directory into the container at /code
-COPY ./app /code/app
+# Copy the shared library
+COPY ./libs/common_models /code/libs/common_models
+
+# Install the shared library so Python can find it
+RUN pip install -e /code/libs/common_models
+
+# Copy the application code for the specific service
+COPY ./services/pulse-ingest/app /code/app
 
 # Command to run the application
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
