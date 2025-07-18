@@ -3,3 +3,4 @@ uvicorn[standard]
 pydantic
 httpx
 pydantic-settings
+kafka-python
