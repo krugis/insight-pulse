@@ -30,9 +30,9 @@ services:
     ports:
       - "9200:9200"
     environment:
-      - discovery.type=single-node
-      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
-      - DISABLE_SECURITY_PLUGIN: "true" # <-- ADD THIS LINE
+      discovery.type: single-node
+      OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx512m"
+      DISABLE_SECURITY_PLUGIN: "true"
     volumes:
       - opensearch-data:/usr/share/opensearch/data
 
