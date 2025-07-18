@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
-from app.core.models import StandardPost
+from common_models.post import StandardPost
 
 class SocialMediaAdapter(ABC):
     """Abstract base class for all social media adapters."""

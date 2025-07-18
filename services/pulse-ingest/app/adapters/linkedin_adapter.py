@@ -2,7 +2,7 @@ import asyncio
 from typing import List, Dict, Any
 import httpx
 
-from app.core.models import StandardPost, AuthorDetails, EngagementMetrics
+from common_models.post import StandardPost, AuthorDetails, EngagementMetrics
 from app.core.config import settings
 from .base import SocialMediaAdapter
 
