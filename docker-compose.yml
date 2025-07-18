@@ -37,7 +37,8 @@ services:
 
   pulse-ingest:
     build:
-      context: ./services/pulse-ingest
+      context: . # Use the project root as context
+      dockerfile: ./services/pulse-ingest/Dockerfile # Specify path to Dockerfile
     container_name: pulse-ingest
     ports:
       - "8000:8000"
@@ -46,10 +47,10 @@ services:
     depends_on:
       - kafka
 
-  # --- ADD THIS SECTION ---
   pulse-content-api:
     build:
-      context: ./services/pulse-content-api
+      context: . # Use the project root as context
+      dockerfile: ./services/pulse-content-api/Dockerfile # Specify path to Dockerfile
     container_name: pulse-content-api
     ports:
       - "8001:8001"
@@ -58,7 +59,6 @@ services:
     depends_on:
       - kafka
       - opensearch
-  # ------------------------
 
 volumes:
   opensearch-data:
