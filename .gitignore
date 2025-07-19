@@ -46,3 +46,6 @@ Thumbs.db
 # --- Log files ---
 # Ignore any custom log files.
 *.log
+
+# Ignore test data files
+scripts/test_data/
