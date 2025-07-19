@@ -14,5 +14,7 @@ RUN pip install -e /code/libs/common_models
 # Copy the application code for the specific service
 COPY ./services/pulse-ingest/app /code/app
 
+COPY ./services/pulse-ingest/test_data /code/test_data
+
 # Command to run the application
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

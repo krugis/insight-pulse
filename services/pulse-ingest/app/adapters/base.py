@@ -6,6 +6,6 @@ class SocialMediaAdapter(ABC):
     """Abstract base class for all social media adapters."""
     
     @abstractmethod
-    async def fetch_posts(self, user_id: str) -> List[StandardPost]:
-        """Fetches posts for a given user ID and returns them in a standardized format."""
+    async def fetch_posts(self, author_urls: List[str]) -> List[StandardPost]:
+        """Fetches posts for a given list of user URLs and returns them in a standardized format."""
         pass
