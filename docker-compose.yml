@@ -128,6 +128,14 @@ services:
       postgres:
         condition: service_healthy # Wait for the DB to be healthy
 
+  pulse-email-service:
+    build:
+      context: .
+      dockerfile: ./services/pulse-email-service/Dockerfile
+    container_name: pulse-email-service
+    ports:
+      - "8004:8004"
+
 volumes:
   opensearch-data:
   postgres-data:
