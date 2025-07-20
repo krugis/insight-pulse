@@ -10,7 +10,7 @@ EMBEDDING_SERVICE_NAME = "pulse-embedding-service"
 AI_CORE_API_BASE_URL = "http://pulse-ai-core:8002"
 
 # --- Database Connection ---
-engine = create_engine(AGENT_MANAGER_DB_URL)
+engine = create_engine(settings.DATABASE_URL)
 
 async def run_daily_pipeline():
     """The main function that orchestrates the entire daily workflow."""
