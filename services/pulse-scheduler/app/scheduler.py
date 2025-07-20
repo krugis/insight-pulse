@@ -2,10 +2,9 @@ import httpx
 import asyncio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlalchemy import create_engine, text
-from app.core.config import settings
+from .core.config import settings
 
 # --- Configuration ---
-AGENT_MANAGER_DB_URL = "postgresql://user:password@postgres/mydatabase"
 INGEST_API_URL = "http://pulse-ingest:8000/ingest/linkedin"
 EMBEDDING_SERVICE_NAME = "pulse-embedding-service"
 AI_CORE_API_BASE_URL = "http://pulse-ai-core:8002"

@@ -151,8 +151,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - .:/code 
     working_dir: /code
-    env_file: # <-- ADD THIS
-      - ./services/pulse-scheduler/.env # <-- ADD THIS
+    env_file: 
+      - ./services/pulse-scheduler/.env 
     command: python -m services.pulse-scheduler.app.scheduler
 
 volumes:
