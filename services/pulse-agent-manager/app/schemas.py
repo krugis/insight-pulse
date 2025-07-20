@@ -2,8 +2,9 @@ from pydantic import BaseModel, HttpUrl, EmailStr, Field
 from typing import List, Optional
 
 class AgentCreate(BaseModel):
+    # Python code uses snake_case for attributes
     email: EmailStr
-    plan: str = Field(..., alias='plan_type') # Accept 'plan' and map it to 'plan_type'
+    plan_type: str = Field(..., alias='plan')
     apify_token: Optional[str] = Field(None, alias='apifyToken')
     openai_token: Optional[str] = Field(None, alias='openaiToken')
     digest_tone: str = Field(..., alias='digestTone')
@@ -12,12 +13,13 @@ class AgentCreate(BaseModel):
 
     class Config:
         from_attributes = True
-        populate_by_name = True # Allow both alias and field name
+        # This tells Pydantic to read the JSON using the aliases
+        populate_by_name = True
 
 class AgentResponse(BaseModel):
     id: int
     email: EmailStr
     plan_type: str
-
+    
     class Config:
         from_attributes = True
