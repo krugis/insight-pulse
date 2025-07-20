@@ -101,12 +101,18 @@ services:
     container_name: postgres
     environment:
       POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: password # Make sure this matches your .env file
       POSTGRES_DB: mydatabase
     ports:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    # --- ADD THIS HEALTHCHECK ---
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d mydatabase"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   pulse-agent-manager:
     build:
@@ -117,8 +123,10 @@ services:
       - "8003:8003"
     env_file:
       - ./services/pulse-agent-manager/.env
+    # --- UPDATE THIS depends_on SECTION ---
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy # Wait for the DB to be healthy
 
 volumes:
   opensearch-data:
