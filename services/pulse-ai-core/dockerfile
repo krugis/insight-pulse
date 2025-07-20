@@ -9,4 +9,4 @@ RUN pip install -e /code/libs/common_models
 
 COPY ./services/pulse-ai-core/app /code/app
 
-CMD ["python", "-m", "app.analyzer"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8002"]

@@ -91,6 +91,8 @@ services:
     container_name: pulse-ai-core
     env_file:
       - ./services/pulse-ai-core/.env
+    ports:
+      - "8002:8002"
     depends_on:
       - opensearch
     volumes:
@@ -135,6 +137,20 @@ services:
     container_name: pulse-email-service
     ports:
       - "8004:8004"
+
+  pulse-scheduler:
+    build:
+      context: .
+      dockerfile: ./services/pulse-scheduler/Dockerfile
+    container_name: pulse-scheduler
+    depends_on:
+      - pulse-ingest
+      - pulse-ai-core
+      - postgres
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - .:/code 
+    working_dir: /code
 
 volumes:
   opensearch-data:

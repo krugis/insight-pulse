@@ -1,0 +1,4 @@
+httpx
+apscheduler
+sqlalchemy
+psycopg2-binary

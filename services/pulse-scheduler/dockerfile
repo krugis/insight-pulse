@@ -1,0 +1,12 @@
+FROM python:3.11-slim
+WORKDIR /code
+
+# Install docker-cli for running docker compose commands
+RUN apt-get update && apt-get install -y docker.io
+
+COPY ./services/pulse-scheduler/requirements.txt /code/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+
+COPY ./services/pulse-scheduler/app /code/app
+
+CMD ["python", "-m", "app.scheduler"]
