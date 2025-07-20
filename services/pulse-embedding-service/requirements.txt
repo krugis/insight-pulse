@@ -2,3 +2,4 @@ opensearch-py
 sentence-transformers
 torch
 pydantic-settings
+uvicorn[standard]
