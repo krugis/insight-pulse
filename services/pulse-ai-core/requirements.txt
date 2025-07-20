@@ -5,3 +5,4 @@ hdbscan
 openai
 pydantic-settings
 uvicorn[standard]
+fastapi

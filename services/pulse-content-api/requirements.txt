@@ -3,3 +3,4 @@ uvicorn[standard]
 pydantic-settings
 kafka-python
 opensearch-py
+fastapi

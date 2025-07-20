@@ -5,6 +5,11 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'ruok' | nc -w 2 localhost 2181 | grep imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - pulse_net
 
@@ -13,6 +18,7 @@ services:
     container_name: kafka
     ports:
       - "9092:9092"
+    # UPDATED: depends_on zookeeper without a health condition
     depends_on:
       - zookeeper
     environment:
@@ -25,10 +31,9 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-    # --- ADD THIS HEALTHCHECK ---
     healthcheck:
       test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
-      interval: 10s
+      interval: 15s
       timeout: 5s
       retries: 5
     networks:
@@ -48,84 +53,17 @@ services:
     networks:
       - pulse_net
 
-  pulse-ingest:
-    build:
-      context: .
-      dockerfile: ./services/pulse-ingest/Dockerfile
-    container_name: pulse-ingest
-    ports:
-      - "8000:8000"
-    env_file:
-      - ./services/pulse-ingest/.env
-    # --- UPDATE THIS depends_on SECTION ---
-    depends_on:
-      kafka:
-        condition: service_healthy
-    networks:
-      - pulse_net
-
-  pulse-content-api:
-    build:
-      context: .
-      dockerfile: ./services/pulse-content-api/Dockerfile
-    container_name: pulse-content-api
-    ports:
-      - "8001:8001"
-    env_file:
-      - ./services/pulse-content-api/.env
-    # --- UPDATE THIS depends_on SECTION ---
-    depends_on:
-      kafka:
-        condition: service_healthy
-      opensearch:
-        condition: service_started # OpenSearch doesn't have a simple healthcheck command
-    networks:
-      - pulse_net
-
-  pulse-embedding-service: 
-    build:
-      context: .
-      dockerfile: ./services/pulse-embedding-service/Dockerfile
-    container_name: pulse-embedding-service
-    mem_limit: 1g
-    ports:
-      - "8005:8005"
-    environment:
-      - OPENSEARCH_HOST=opensearch
-    depends_on:
-      opensearch:
-        condition: service_started
-    networks:
-      - pulse_net
-
-  pulse-ai-core:
-    build:
-      context: .
-      dockerfile: ./services/pulse-ai-core/Dockerfile
-    container_name: pulse-ai-core
-    env_file:
-      - ./services/pulse-ai-core/.env
-    ports:
-      - "8002:8002"
-    depends_on:
-      - opensearch
-    volumes:
-      - ./output:/code/output
-    networks:
-      - pulse_net
-
   postgres:
     image: postgres:15
     container_name: postgres
     environment:
       POSTGRES_USER: user
-      POSTGRES_PASSWORD: Ate123456789 # Make sure this matches your .env file
+      POSTGRES_PASSWORD: Ate123456789
       POSTGRES_DB: mydatabase
     ports:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    # --- ADD THIS HEALTHCHECK ---
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U user -d mydatabase"]
       interval: 10s
@@ -134,50 +72,73 @@ services:
     networks:
       - pulse_net
 
+  pulse-ingest:
+    build: { context: ., dockerfile: ./services/pulse-ingest/Dockerfile }
+    container_name: pulse-ingest
+    ports: ["8000:8000"]
+    env_file: [./services/pulse-ingest/.env]
+    depends_on: { kafka: { condition: service_healthy } }
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:8000/docs"], interval: 10s, timeout: 5s, retries: 5 }
+    networks: [pulse_net]
+
+  pulse-content-api:
+    build: { context: ., dockerfile: ./services/pulse-content-api/Dockerfile }
+    container_name: pulse-content-api
+    ports: ["8001:8001"]
+    env_file: [./services/pulse-content-api/.env]
+    depends_on: { kafka: { condition: service_healthy }, opensearch: { condition: service_started } }
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:8001/"], interval: 10s, timeout: 5s, retries: 5 }
+    networks: [pulse_net]
+
+  pulse-embedding-service:
+    build: { context: ., dockerfile: ./services/pulse-embedding-service/Dockerfile }
+    container_name: pulse-embedding-service
+    mem_limit: 1g
+    ports: ["8005:8005"]
+    environment: [OPENSEARCH_HOST=opensearch]
+    depends_on: { opensearch: { condition: service_started } }
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:8005/docs"], interval: 10s, timeout: 5s, retries: 5 }
+    networks: [pulse_net]
+
+  pulse-ai-core:
+    build: { context: ., dockerfile: ./services/pulse-ai-core/Dockerfile }
+    container_name: pulse-ai-core
+    ports: ["8002:8002"]
+    env_file: [./services/pulse-ai-core/.env]
+    depends_on: { opensearch: { condition: service_started } }
+    volumes: ["./output:/code/output"]
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:8002/docs"], interval: 10s, timeout: 5s, retries: 5 }
+    networks: [pulse_net]
+
   pulse-agent-manager:
-    build:
-      context: .
-      dockerfile: ./services/pulse-agent-manager/Dockerfile
+    build: { context: ., dockerfile: ./services/pulse-agent-manager/Dockerfile }
     container_name: pulse-agent-manager
-    ports:
-      - "8003:8003"
-    env_file:
-      - ./services/pulse-agent-manager/.env
-    # --- UPDATE THIS depends_on SECTION ---
-    depends_on:
-      postgres:
-        condition: service_healthy # Wait for the DB to be healthy
-    networks:
-      - pulse_net
+    ports: ["8003:8003"]
+    env_file: [./services/pulse-agent-manager/.env]
+    depends_on: { postgres: { condition: service_healthy } }
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:8003/docs"], interval: 10s, timeout: 5s, retries: 5 }
+    networks: [pulse_net]
 
   pulse-email-service:
-    build:
-      context: .
-      dockerfile: ./services/pulse-email-service/Dockerfile
+    build: { context: ., dockerfile: ./services/pulse-email-service/Dockerfile }
     container_name: pulse-email-service
-    ports:
-      - "8004:8004"
-    networks:
-      - pulse_net
+    ports: ["8004:8004"]
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:8004/docs"], interval: 10s, timeout: 5s, retries: 5 }
+    networks: [pulse_net]
 
   pulse-scheduler:
-    build:
-      context: .
-      dockerfile: ./services/pulse-scheduler/Dockerfile
+    build: { context: ., dockerfile: ./services/pulse-scheduler/Dockerfile }
     container_name: pulse-scheduler
     depends_on:
-      - pulse-ingest
-      - pulse-ai-core
-      - postgres
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - .:/code 
+      pulse-ingest: { condition: service_healthy }
+      pulse-ai-core: { condition: service_healthy }
+      pulse-embedding-service: { condition: service_healthy }
+      postgres: { condition: service_healthy }
+    volumes: ["/var/run/docker.sock:/var/run/docker.sock", ".:/code"]
     working_dir: /code
-    env_file: 
-      - ./services/pulse-scheduler/.env 
+    env_file: [./services/pulse-scheduler/.env]
     command: python -m services.pulse-scheduler.app.scheduler
-    networks:
-      - pulse_net
+    networks: [pulse_net]
 
 volumes:
   opensearch-data:
