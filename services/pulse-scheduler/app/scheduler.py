@@ -2,6 +2,7 @@ import httpx
 import asyncio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlalchemy import create_engine, text
+from app.core.config import settings
 
 # --- Configuration ---
 AGENT_MANAGER_DB_URL = "postgresql://user:password@postgres/mydatabase"
