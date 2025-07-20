@@ -1,0 +1,43 @@
+{
+  "news_ticker": {
+    "headlines": [
+      "BREAKING: Figma Designs Now Instantly Converted to Code with New Claude Connector!",
+      "URGENT: Swedish Startup Lovable Hits $1.8B Valuation with $200M Funding, Disrupts AI Scene!",
+      "ALERT: Gemini App Unveils New Features Including Photo-to-Video Generation with Veo 3!"
+    ]
+  },
+  "main_story": {
+    "headline": "Revolutionary Figma Connector Transforms Designs into Seamless Code with Claude's Cutting-Edge Technology",
+    "paragraph": "In a groundbreaking development for designers and developers alike, the new Figma connector enables seamless conversion of Figma designs into production-ready code using Claude's advanced analytical capabilities. By integrating Figma's design links directly with Claude, users can now effortlessly transform their creative visions into clean, semantic React components. This innovative tool meticulously analyzes every aspect of a design\u2014from layout and spacing to colors and typography\u2014ensuring that the final code mirrors the original design with precision. With just three simple steps, including installing the connector and enabling the MCP server, this feature promises to revolutionize the design-to-code workflow.",
+    "image": null,
+    "reference_link": "https://www.linkedin.com/posts/anthropicresearch_claude-figma-connector-activity-7352049946734284800-ct4V"
+  },
+  "secondary_stories": [
+    {
+      "headline": "Swedish AI Startup Lovable Secures $200M at $1.8B Valuation",
+      "summary": "Lovable, originally a weekend project called GPT Engineer, achieved $50M ARR in six months with just 40 employees, revolutionizing AI development with no-code solutions and aiming for further automation with Agentic AI.",
+      "image": null,
+      "reference_link": "https://www.linkedin.com/posts/stevenouri_artificialintelligence-technology-lovable-activity-7352071999604654080-Tat0"
+    },
+    {
+      "headline": "Gemini App Unveils New Features Including Photo-to-Video Generation",
+      "summary": "The Gemini App introduces Veo 3 for photo-to-video generation and scheduled actions, enhancing user experience and planning capabilities.",
+      "image": null,
+      "reference_link": "https://www.linkedin.com/posts/google_july-gemini-drops-activity-7352065444146552832-OCBv"
+    }
+  ],
+  "sidebar": {
+    "highlight": {
+      "headline": "Gemini App Unveils Photo-to-Video Generation with Veo 3",
+      "summary": "Explore the latest updates from the Gemini App, featuring the innovative photo-to-video generation capability with Veo 3 and new scheduled actions to enhance your planning and productivity.",
+      "image": null,
+      "reference_link": "https://www.linkedin.com/posts/google_july-gemini-drops-activity-7352065444146552832-OCBv"
+    },
+    "other_news": [
+      "Transform Figma designs into code with Claude's new connector.",
+      "Switch seamlessly between AI providers and LLMs using the OpenAI client.",
+      "Google DeepMind researchers share insights at the International Conference on Machine Learning.",
+      "Swedish startup Lovable secures $200M, reaching a $1.8B valuation with just 40 employees."
+    ]
+  }
+}

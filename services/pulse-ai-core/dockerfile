@@ -1,0 +1,12 @@
+FROM python:3.11-slim
+WORKDIR /code
+
+COPY ./services/pulse-ai-core/requirements.txt /code/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+
+COPY ./libs/common_models /code/libs/common_models
+RUN pip install -e /code/libs/common_models
+
+COPY ./services/pulse-ai-core/app /code/app
+
+CMD ["python", "-m", "app.analyzer"]

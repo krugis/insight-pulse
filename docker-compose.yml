@@ -72,5 +72,29 @@ services:
       opensearch:
         condition: service_started # OpenSearch doesn't have a simple healthcheck command
 
+  pulse-embedding-service:
+    build:
+      context: .
+      dockerfile: ./services/pulse-embedding-service/Dockerfile
+    container_name: pulse-embedding-service
+    mem_limit: 1g # <-- ADD THIS LINE to give the container 1GB of RAM
+    environment:
+      - OPENSEARCH_HOST=opensearch
+    depends_on:
+      opensearch:
+        condition: service_started
+
+  pulse-ai-core:
+    build:
+      context: .
+      dockerfile: ./services/pulse-ai-core/Dockerfile
+    container_name: pulse-ai-core
+    env_file:
+      - ./services/pulse-ai-core/.env
+    depends_on:
+      - opensearch
+    volumes:
+      - ./output:/code/output
+
 volumes:
   opensearch-data:

@@ -1,0 +1,6 @@
+opensearch-py
+pandas
+scikit-learn
+hdbscan
+openai
+pydantic-settings

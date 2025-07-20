@@ -1,0 +1,4 @@
+opensearch-py
+sentence-transformers
+torch
+pydantic-settings
