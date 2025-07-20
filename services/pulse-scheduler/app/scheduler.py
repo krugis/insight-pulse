@@ -6,11 +6,22 @@ from .core.config import settings
 
 # --- Configuration ---
 INGEST_API_URL = "http://pulse-ingest:8000/ingest/linkedin"
-EMBEDDING_SERVICE_NAME = "pulse-embedding-service"
+EMBEDDING_API_URL = "http://pulse-embedding-service:8005/run-batch" # <-- UPDATED
 AI_CORE_API_BASE_URL = "http://pulse-ai-core:8002"
 
 # --- Database Connection ---
 engine = create_engine(settings.DATABASE_URL)
+
+async def trigger_embedding():
+    """Triggers the embedding service via its API."""
+    print("SCHEDULER: Triggering embedding job via API...")
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(EMBEDDING_API_URL, timeout=30.0)
+            response.raise_for_status()
+        print("SCHEDULER: Embedding job triggered successfully.")
+    except Exception as e:
+        print(f"SCHEDULER: Error triggering embedding job: {e}")
 
 async def run_daily_pipeline():
     """The main function that orchestrates the entire daily workflow."""
@@ -39,10 +50,8 @@ async def run_daily_pipeline():
     async with httpx.AsyncClient() as client:
         await client.post(INGEST_API_URL, json={"author_urls": list(all_urls)}, timeout=60.0)
 
-    # 3. Trigger the embedding job
-    print("Triggering embedding job...")
-    proc = await asyncio.create_subprocess_shell(f"docker compose run --rm {EMBEDDING_SERVICE_NAME}")
-    await proc.wait()
+    # 3. Trigger the embedding job via API
+    await trigger_embedding()
 
     # 4. Trigger AI core for each agent
     for agent in agents:

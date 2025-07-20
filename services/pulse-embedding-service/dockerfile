@@ -1,16 +1,12 @@
 FROM python:3.11-slim
 WORKDIR /code
 
-# Copy requirements file for this service
 COPY ./services/pulse-embedding-service/requirements.txt /code/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
-# Copy and install the shared library
 COPY ./libs/common_models /code/libs/common_models
 RUN pip install -e /code/libs/common_models
 
-# Copy the application script
-COPY ./services/pulse-embedding-service/run_embedding_batch.py /code/run_embedding_batch.py
+COPY ./services/pulse-embedding-service/app /code/app
 
-# Set a default command
-CMD ["python", "run_embedding_batch.py"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8005"]

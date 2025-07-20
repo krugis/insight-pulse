@@ -70,6 +70,3 @@ def generate_and_update_embeddings():
             print(f"❌ Failed to update post {post_id}. Error: {e}")
     
     print("Batch embedding job finished.")
-    
-if __name__ == "__main__":
-    generate_and_update_embeddings()

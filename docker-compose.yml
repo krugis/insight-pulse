@@ -5,6 +5,8 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - pulse_net
 
   kafka:
     image: confluentinc/cp-kafka:7.3.2
@@ -29,6 +31,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - pulse_net
 
   opensearch:
     image: opensearchproject/opensearch:2.11.0
@@ -41,6 +45,8 @@ services:
       DISABLE_SECURITY_PLUGIN: "true"
     volumes:
       - opensearch-data:/usr/share/opensearch/data
+    networks:
+      - pulse_net
 
   pulse-ingest:
     build:
@@ -55,6 +61,8 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
+    networks:
+      - pulse_net
 
   pulse-content-api:
     build:
@@ -71,18 +79,24 @@ services:
         condition: service_healthy
       opensearch:
         condition: service_started # OpenSearch doesn't have a simple healthcheck command
+    networks:
+      - pulse_net
 
-  pulse-embedding-service:
+  pulse-embedding-service: 
     build:
       context: .
       dockerfile: ./services/pulse-embedding-service/Dockerfile
     container_name: pulse-embedding-service
-    mem_limit: 1g # <-- ADD THIS LINE to give the container 1GB of RAM
+    mem_limit: 1g
+    ports:
+      - "8005:8005"
     environment:
       - OPENSEARCH_HOST=opensearch
     depends_on:
       opensearch:
         condition: service_started
+    networks:
+      - pulse_net
 
   pulse-ai-core:
     build:
@@ -97,13 +111,15 @@ services:
       - opensearch
     volumes:
       - ./output:/code/output
+    networks:
+      - pulse_net
 
   postgres:
     image: postgres:15
     container_name: postgres
     environment:
       POSTGRES_USER: user
-      POSTGRES_PASSWORD: password # Make sure this matches your .env file
+      POSTGRES_PASSWORD: Ate123456789 # Make sure this matches your .env file
       POSTGRES_DB: mydatabase
     ports:
       - "5432:5432"
@@ -115,6 +131,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - pulse_net
 
   pulse-agent-manager:
     build:
@@ -129,6 +147,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy # Wait for the DB to be healthy
+    networks:
+      - pulse_net
 
   pulse-email-service:
     build:
@@ -137,6 +157,8 @@ services:
     container_name: pulse-email-service
     ports:
       - "8004:8004"
+    networks:
+      - pulse_net
 
   pulse-scheduler:
     build:
@@ -154,7 +176,13 @@ services:
     env_file: 
       - ./services/pulse-scheduler/.env 
     command: python -m services.pulse-scheduler.app.scheduler
+    networks:
+      - pulse_net
 
 volumes:
   opensearch-data:
   postgres-data:
+
+networks:
+  pulse_net:
+    driver: bridge
