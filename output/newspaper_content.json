@@ -1,43 +1,43 @@
 {
   "news_ticker": {
     "headlines": [
-      "BREAKING: Figma Designs Now Instantly Converted to Code with New Claude Connector!",
-      "URGENT: Swedish Startup Lovable Hits $1.8B Valuation with $200M Funding, Disrupts AI Scene!",
-      "ALERT: Gemini App Unveils New Features Including Photo-to-Video Generation with Veo 3!"
+      "BREAKING: Consilium AI Achieves 4X Better Diagnosis Accuracy Than Human Doctors!",
+      "URGENT: Purdue and NIH Develop SciBORG, a Revolutionary AI Memory System Boosting Task Success by 40%!",
+      "ALERT: Major Breakthrough in AI Collaboration with Consilium's Debate-Driven Model for Complex Decisions!"
     ]
   },
   "main_story": {
-    "headline": "Revolutionary Figma Connector Transforms Designs into Seamless Code with Claude's Cutting-Edge Technology",
-    "paragraph": "In a groundbreaking development for designers and developers alike, the new Figma connector enables seamless conversion of Figma designs into production-ready code using Claude's advanced analytical capabilities. By integrating Figma's design links directly with Claude, users can now effortlessly transform their creative visions into clean, semantic React components. This innovative tool meticulously analyzes every aspect of a design\u2014from layout and spacing to colors and typography\u2014ensuring that the final code mirrors the original design with precision. With just three simple steps, including installing the connector and enabling the MCP server, this feature promises to revolutionize the design-to-code workflow.",
+    "headline": "Perplexity's Comet: The AI Browser Set to Revolutionize Search, Challenging Google's Reign",
+    "paragraph": "In a groundbreaking development, Perplexity's Comet is emerging as the AI-powered browser that could redefine the way we navigate the digital world, posing a formidable challenge to Google's longstanding dominance. This innovative browser utilizes advanced artificial intelligence to deliver a seamless, intuitive user experience, promising to enhance search efficiency and personalization. As tech enthusiasts and industry leaders turn their attention towards this revolutionary tool, Comet's potential to disrupt the status quo becomes increasingly evident. With its cutting-edge technology and user-centric design, Perplexity's Comet is poised to become the browser of choice for the next generation, signaling a new era in digital exploration.",
     "image": null,
-    "reference_link": "https://www.linkedin.com/posts/anthropicresearch_claude-figma-connector-activity-7352049946734284800-ct4V"
+    "reference_link": "https://www.linkedin.com/posts/aravind-srinivas-16051987_perplexitys-comet-is-the-ai-browser-google-activity-7352713910707253251-J0pK"
   },
   "secondary_stories": [
     {
-      "headline": "Swedish AI Startup Lovable Secures $200M at $1.8B Valuation",
-      "summary": "Lovable, originally a weekend project called GPT Engineer, achieved $50M ARR in six months with just 40 employees, revolutionizing AI development with no-code solutions and aiming for further automation with Agentic AI.",
+      "headline": "Consilium: AI Models Debate for Superior Decisions",
+      "summary": "Microsoft's Consilium, developed during the Agents-MCP hackathon, showcases a multi-agent AI setup where LLMs with distinct roles debate complex questions, achieving 85.5% diagnostic accuracy, significantly outperforming human doctors.",
       "image": null,
-      "reference_link": "https://www.linkedin.com/posts/stevenouri_artificialintelligence-technology-lovable-activity-7352071999604654080-Tat0"
+      "reference_link": "https://www.linkedin.com/posts/gradio_mixture-of-experts-no-no-roundtable-of-ugcPost-7352036889480134659-FQnC"
     },
     {
-      "headline": "Gemini App Unveils New Features Including Photo-to-Video Generation",
-      "summary": "The Gemini App introduces Veo 3 for photo-to-video generation and scheduled actions, enhancing user experience and planning capabilities.",
+      "headline": "SciBORG: Enhancing AI Memory with Finite-State Automata",
+      "summary": "Researchers from Purdue and NIH introduce SciBORG, an innovative approach that equips AI agents with finite-state automata memory, improving task success to 90% and enabling reliable autonomous operations in complex scenarios.",
       "image": null,
-      "reference_link": "https://www.linkedin.com/posts/google_july-gemini-drops-activity-7352065444146552832-OCBv"
+      "reference_link": "https://www.linkedin.com/posts/pascalbiese_state-and-memory-is-all-you-need-for-robust-activity-7352637200183767040-MyOV"
     }
   ],
   "sidebar": {
     "highlight": {
-      "headline": "Gemini App Unveils Photo-to-Video Generation with Veo 3",
-      "summary": "Explore the latest updates from the Gemini App, featuring the innovative photo-to-video generation capability with Veo 3 and new scheduled actions to enhance your planning and productivity.",
+      "headline": "AI's Impact on Jobs in 2025: A Growing Crisis",
+      "summary": "In 2025, major technology companies have cut over 77,000 jobs as artificial intelligence automates traditional roles, while promised job creation and retraining programs remain largely unfulfilled. The rapid displacement of employees outpaces the emergence of new opportunities, with governments struggling to address this escalating crisis.",
       "image": null,
-      "reference_link": "https://www.linkedin.com/posts/google_july-gemini-drops-activity-7352065444146552832-OCBv"
+      "reference_link": "https://www.linkedin.com/posts/bernardmarr_ai-jobs-technology-activity-7352691417577574401-Zcs7"
     },
     "other_news": [
-      "Transform Figma designs into code with Claude's new connector.",
-      "Switch seamlessly between AI providers and LLMs using the OpenAI client.",
-      "Google DeepMind researchers share insights at the International Conference on Machine Learning.",
-      "Swedish startup Lovable secures $200M, reaching a $1.8B valuation with just 40 employees."
+      "AI Browser 'Perplexity\u2019s Comet' Could Be Google's Next Big Thing.",
+      "Purdue and NIH Introduce SciBORG to Solve AI's Memory Problem.",
+      "Multimodal AI Systems Are Revolutionizing Human-Technology Interactions.",
+      "Consilium: AI Models Debate for Superior Decision-Making Accuracy."
     ]
   }
 }
