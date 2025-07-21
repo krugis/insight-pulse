@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8009:8000"
+    volumes:
+      - .:/app # Mount current directory to /app for live reloading during development
+    env_file:
+      - ./.env # Load environment variables from .env file
+    depends_on:
+      - db # Ensure db service starts before app
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"] # Enable reload for dev
+    networks:
+      - aigora-network
+
+  db:
+    image: postgres:16-alpine # Using a lightweight PostgreSQL image
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/ # Persistent data volume
+    env_file:
+      - ./.env # Load PostgreSQL specific environment variables from .env
+    environment: # Explicitly define environment variables for the Postgres container
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5433:5432" # Expose DB port to host (optional, for direct connection if needed)
+    networks:
+      - aigora-network
+
+volumes:
+  postgres_data: # Define the named volume for PostgreSQL data persistence
+
+networks:
+  aigora-network: # Define a custom network for inter-service communication
+    driver: bridge

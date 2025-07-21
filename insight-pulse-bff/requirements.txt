@@ -1,0 +1,10 @@
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+SQLAlchemy==2.0.30
+psycopg2-binary==2.9.9  # For PostgreSQL, if you plan to use it later. For SQLite, not strictly needed but good to have if using ORM.
+Pydantic==2.7.3
+pydantic-settings==2.3.4
+passlib[bcrypt]==1.7.4
+python-jose[cryptography]==3.3.0
+python-dotenv==1.0.1
+httpx==0.27.0
