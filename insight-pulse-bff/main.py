@@ -13,15 +13,13 @@ app = FastAPI(
 )
 
 # Configure CORS (Cross-Origin Resource Sharing)
-# This allows your frontend (running on a different origin) to communicate with this BFF.
-# Adjust origins in production to be more restrictive.
 origins = [
     "http://localhost",
-    "http://localhost:8000", # Example for Uvicorn
-    "http://localhost:8080", # Example for frontend development server
+    "http://localhost:8000",
+    "http://localhost:8080",
     "http://127.0.0.1:8000",
-    "http://127.0.0.1:5500", # Common for Live Server VS Code extension
-    "https://aigora.cloud", # Your production frontend domain
+    "http://127.0.0.1:5500",
+    "https://aigora.cloud",
 ]
 
 app.add_middleware(
@@ -32,20 +30,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include API routers here (will add in subsequent steps)
-# from app.api.v1.api import api_router
-# app.include_router(api_router, prefix="/api/v1")
+# --- NEW: Include API router ---
+from app.api.v1.api import api_router #
+app.include_router(api_router, prefix="/api/v1") #
+# -----------------------------
 
 @app.get("/")
 async def root():
     return {"message": "Insight Pulse BFF is running!"}
 
-# You can add more global event handlers here if needed
 @app.on_event("startup")
 async def startup_event():
     print("Insight Pulse BFF starting up...")
-    # Placeholder for any database migration or initial setup logic
-    # You'll run initial_db_setup.py script separately for table creation
+    # Database table creation will be handled by a separate script
     pass
 
 @app.on_event("shutdown")
