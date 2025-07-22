@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     # Database settings
     # Default to a PostgreSQL URL format for Docker Compose
     DATABASE_URL: str = "postgresql://aigora_db_user:supersecretkey@db:5432/aigora_db"
-
+    PULSE_AGENT_MANAGER_BASE_URL: str = "http://pulse-agent-manager:8000"
     # Security settings
     SECRET_KEY: str = "supersecretkey" # CHANGE THIS IN PRODUCTION TO A LONG, RANDOM STRING!
     ALGORITHM: str = "HS256"

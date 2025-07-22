@@ -13,7 +13,7 @@ services:
       - db # Ensure db service starts before app
     command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"] # Enable reload for dev
     networks:
-      - aigora-network
+      - pulse_net
 
   db:
     image: postgres:16-alpine # Using a lightweight PostgreSQL image
@@ -28,11 +28,11 @@ services:
     ports:
       - "5433:5432" # Expose DB port to host (optional, for direct connection if needed)
     networks:
-      - aigora-network
+      - pulse_net
 
 volumes:
   postgres_data: # Define the named volume for PostgreSQL data persistence
 
 networks:
-  aigora-network: # Define a custom network for inter-service communication
+  pulse_net: # Define a custom network for inter-service communication
     driver: bridge
