@@ -3,17 +3,23 @@ from typing import Optional
 
 class Settings(BaseSettings):
     # Database settings
-    # Default to a PostgreSQL URL format for Docker Compose
-    DATABASE_URL: str = "postgresql://aigora_db_user:supersecretkey@db:5432/aigora_db"
-    PULSE_AGENT_MANAGER_BASE_URL: str = "http://pulse-agent-manager:8003"
+    DATABASE_URL: str = "postgresql://user:password@db:5432/aigora_db"
+
     # Security settings
-    SECRET_KEY: str = "supersecretkey" # CHANGE THIS IN PRODUCTION TO A LONG, RANDOM STRING!
+    SECRET_KEY: str = "supersecretkey" # CHANGE THIS IN PRODUCTION!
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
-    # External API keys
+    # External API keys (for BYOK plans)
     APIFY_API_KEY: Optional[str] = None
     OPENAI_API_KEY: Optional[str] = None
+
+    # Base URL for other internal microservices
+    PULSE_AGENT_MANAGER_BASE_URL: str = "http://pulse-agent-manager:8003"
+    #PULSE_INGEST_BASE_URL: Optional[str] = None # Placeholder
+    #PULSE_AI_CORE_BASE_URL: Optional[str] = None # Placeholder
+    #PULSE_SCHEDULER_BASE_URL: Optional[str] = None # Placeholder
+    ^#PULSE_EMAIL_BASE_URL: Optional[str] = None # Placeholder
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
