@@ -157,8 +157,8 @@
             </div>
             <div class="mt-6 flex justify-end space-x-3">
                 <button class="btn-secondary py-2 px-4 rounded-lg" id="close-details-modal">Close</button>
-                <button class="btn-primary py-2 px-4 rounded-lg">Edit Agent</button>
-                <button class="btn-primary py-2 px-4 rounded-lg delete-agent-btn">Delete Agent</button>
+                <button class="btn-secondary py-2 px-4 rounded-lg" id="edit-agent-modal-btn">Edit Agent</button>
+                <button class="btn-primary py-2 px-4 rounded-lg" id="delete-agent-modal-btn">Delete Agent</button>
             </div>
         </div>
     </div>
@@ -212,6 +212,8 @@
             const modalLastRun = document.getElementById('modal-last-run');
             const modalNextRun = document.getElementById('modal-next-run');
             const closeDetailsModalBtn = document.getElementById('close-details-modal');
+            const editAgentModalBtn = document.getElementById('edit-agent-modal-btn'); // Get the button by its ID
+            const deleteAgentModalBtn = document.getElementById('delete-agent-modal-btn'); // Get the button by its ID
 
             const pauseConfirmModal = document.getElementById('pause-confirm-modal');
             const pauseAgentNameSpan = document.getElementById('pause-agent-name');
@@ -257,7 +259,7 @@
                         noRunsMessage.classList.add('hidden'); // Hide no runs message if agents found
                         agentRunsTableBody.innerHTML = ''; // Clear existing run entries
 
-                        let firstAgentPlanType = "N/A"; // Default for account summary
+                        let firstAgentPlanType = "N/A";
                         let hasApifyToken = false;
                         let hasOpenAIToken = false;
 
@@ -266,7 +268,7 @@
                             agentListContainer.appendChild(agentCard);
 
                             // Get plan type and token status from first agent (or aggregate)
-                            if (firstAgentPlanType === "N/A") { // Only set from first agent for simplicity
+                            if (firstAgentPlanType === "N/A") {
                                 firstAgentPlanType = agent.config_data.plan || "N/A";
                             }
                             if (agent.apify_token) hasApifyToken = true;
@@ -294,7 +296,7 @@
             // --- Fetch and Render Agent Runs ---
             async function fetchAndRenderAgentRuns(agentId, agentName) {
                 try {
-                    const runs = await getAgentRuns(agentId); // From api.js
+                    const runs = await getAgentRuns(agentId);
                     if (runs.length > 0) {
                         runs.forEach(run => {
                             const runRow = createRunRow(run, agentName);
@@ -316,7 +318,7 @@
 
                 const card = document.createElement('div');
                 card.className = 'p-4 bg-gray-800/50 rounded-lg border border-gray-700 flex flex-col md:flex-row justify-between items-start md:items-center';
-                card.setAttribute('data-agent-id', agent.id); // For easy selection
+                card.setAttribute('data-agent-id', agent.id);
 
                 card.innerHTML = `
                     <div>
@@ -337,7 +339,7 @@
             function createRunRow(run, agentName) {
                 const row = document.createElement('tr');
                 const statusClass = run.status === 'completed' ? 'text-green-400' : (run.status === 'failed' ? 'text-red-400' : 'text-yellow-400');
-                const formattedTimestamp = new Date(run.timestamp).toLocaleString(); // Format date nicely
+                const formattedTimestamp = new Date(run.timestamp).toLocaleString();
 
                 row.innerHTML = `
                     <td class="py-2 px-4">${agentName}</td>
@@ -355,7 +357,7 @@
             // --- Modal Interaction Functions ---
             function openDetailsModal(agent) {
                 modalAgentName.textContent = agent.agent_name;
-                modalAgentType.textContent = "Insight Pulse Agent"; // Hardcoded for now
+                modalAgentType.textContent = "Insight Pulse Agent";
                 modalAgentStatus.textContent = agent.status;
                 modalAgentStatus.className = (agent.status === 'active' ? 'text-green-400' : 'text-yellow-400');
 
@@ -404,12 +406,12 @@
                 activateConfirmModal.classList.add('hidden');
             }
 
-            // --- Event Delegation for Agent Card Buttons ---
+            // --- Event Delegation for Agent Card Buttons (on main dashboard) ---
             agentListContainer.addEventListener('click', async (e) => {
                 const target = e.target;
                 const agentId = target.dataset.agentId;
                 const agentName = target.dataset.agentName;
-                const agent = currentAgents.find(a => a.id == agentId); // Find agent from cache
+                const agent = currentAgents.find(a => a.id == agentId);
 
                 if (!agentId) return; // Not an agent button
 
@@ -420,59 +422,98 @@
                 } else if (target.classList.contains('activate-btn')) {
                     openActivateConfirmModal(agentId, agentName);
                 } else if (target.classList.contains('delete-agent-btn')) {
+                    // This handles delete buttons on the main cards, not the modal
                     if (confirm(`Are you sure you want to delete "${agentName}"? This action cannot be undone.`)) {
                         try {
-                            await deleteAgent(agentId); // From api.js
+                            await deleteAgent(agentId); // Call api.js delete function
                             alert(`${agentName} deleted successfully!`);
                             fetchAgentList(); // Refresh list
                         } catch (error) {
                             console.error('Error deleting agent:', error);
+                            alert(`Failed to delete agent: ${error.message}`);
                         }
                     }
                 }
             });
 
+            // --- Listeners for MODAL buttons ---
             closeDetailsModalBtn.addEventListener('click', closeDetailsModal);
             cancelPauseBtn.addEventListener('click', closePauseConfirmModal);
             cancelActivateBtn.addEventListener('click', closeActivateConfirmModal);
 
+            // Edit Agent button in modal (sets ID and redirects)
+            editAgentModalBtn.addEventListener('click', () => {
+                const agentIdToEdit = editAgentModalBtn.dataset.agentId; // Get ID from the button
+                if (agentIdToEdit) {
+                    closeDetailsModal(); // Close details modal first
+                    window.location.href = `edit-agent.html?id=${agentIdToEdit}`; // Redirect
+                }
+            });
+
+            // Delete Agent button in modal (direct listener)
+            deleteAgentModalBtn.addEventListener('click', async () => {
+                // Get agent ID from the context. Use editAgentModalBtn's data-agent-id as it's set on modal open
+                const agentIdToDelete = editAgentModalBtn.dataset.agentId; 
+                const agentToDelete = currentAgents.find(a => a.id == agentIdToDelete);
+                const agentNameToDelete = agentToDelete ? agentToDelete.agent_name : 'this agent';
+
+                if (!agentIdToDelete) {
+                    alert("Could not determine agent to delete.");
+                    return;
+                }
+
+                if (confirm(`Are you sure you want to delete "${agentNameToDelete}"? This action cannot be undone.`)) {
+                    try {
+                        await deleteAgent(agentIdToDelete); // Call API
+                        alert(`${agentNameToDelete} deleted successfully!`);
+                        closeDetailsModal(); // Close modal
+                        fetchAgentList(); // Refresh dashboard list
+                    } catch (error) {
+                        console.error('Error deleting agent from modal:', error);
+                        alert(`Failed to delete agent: ${error.message}`);
+                    }
+                }
+            });
+
+
             confirmPauseBtn.addEventListener('click', async (e) => {
                 const agentId = e.target.dataset.agentId;
                 try {
-                    await updateAgentStatus(agentId, 'paused'); // From api.js
+                    await updateAgentStatus(agentId, 'paused');
                     alert('Agent paused successfully!');
                     closePauseConfirmModal();
-                    fetchAgentList(); // Refresh list
+                    fetchAgentList();
                 } catch (error) {
                     console.error('Error pausing agent:', error);
+                    alert(`Failed to pause agent: ${error.message}`);
                 }
             });
 
             confirmActivateBtn.addEventListener('click', async (e) => {
                 const agentId = e.target.dataset.agentId;
                 try {
-                    await updateAgentStatus(agentId, 'active'); // From api.js
+                    await updateAgentStatus(agentId, 'active');
                     alert('Agent activated successfully!');
                     closeActivateConfirmModal();
-                    fetchAgentList(); // Refresh list
+                    fetchAgentList();
                 } catch (error) {
                     console.error('Error activating agent:', error);
+                    alert(`Failed to activate agent: ${error.message}`);
                 }
             });
 
             // --- Logout Functionality ---
             logoutBtn.addEventListener('click', () => {
-                removeAccessToken(); // From api.js
-                window.location.href = 'index.html'; // Redirect to home page
+                removeAccessToken();
+                window.location.href = 'index.html';
             });
 
             // Initial data load on page load
-            // Ensure user is authenticated before attempting to fetch
-            if (getAccessToken()) { // Check if token exists
+            if (getAccessToken()) {
                 fetchUserInfo();
                 fetchAgentList();
             } else {
-                window.location.href = 'login.html'; // Redirect to login if no token
+                window.location.href = 'login.html';
             }
         });
     </script>
