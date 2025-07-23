@@ -82,7 +82,7 @@
                 <li><a href="create-agent.html" class="text-gray-300 hover:text-white">Create New Agent</a></li>
                 <li><a href="https://aigora.cloud" target="_blank" class="text-gray-300 hover:text-white">Marketplace</a></li>
                 <li><a href="settings.html" class="text-gray-300 hover:text-white">Settings</a></li>
-                <li><a href="index.html" class="text-gray-300 hover:text-white">Logout</a></li>
+                <li><button id="logout-btn" class="text-gray-300 hover:text-white">Logout</button></li>
             </ul>
         </nav>
     </header>
@@ -97,12 +97,12 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-300">
                 <div>
-                    <p><span class="font-medium text-gray-400">Email:</span> user@example.com</p>
-                    <p><span class="font-medium text-gray-400">Plan Type:</span> Subscribe</p>
+                    <p><span class="font-medium text-gray-400">Email:</span> <span id="account-email">Loading...</span></p>
+                    <p><span class="font-medium text-gray-400">Plan Type:</span> <span id="account-plan-type">Loading...</span></p>
                 </div>
                 <div>
-                    <p><span class="font-medium text-gray-400">Apify API Token:</span> Connected</p>
-                    <p><span class="font-medium text-gray-400">OpenAI API Token:</span> Connected</p>
+                    <p><span class="font-medium text-gray-400">Apify API Token:</span> <span id="account-apify-status">Loading...</span></p>
+                    <p><span class="font-medium text-gray-400">OpenAI API Token:</span> <span id="account-openai-status">Loading...</span></p>
                 </div>
             </div>
         </div>
@@ -112,40 +112,8 @@
                 <h2 class="text-xl font-semibold text-white">Your AI Agents</h2>
                 <a href="create-agent.html" class="btn-primary font-semibold py-2 px-4 rounded-lg">New Agent</a>
             </div>
-            <div class="space-y-4" id="agent-list">
-                <div class="p-4 bg-gray-800/50 rounded-lg border border-gray-700 flex flex-col md:flex-row justify-between items-start md:items-center" data-agent-id="1">
-                    <div>
-                        <h3 class="font-bold text-lg text-white">Insight Pulse Agent (Tech Influencers)</h3>
-                        <p class="text-gray-400 text-sm">Status: <span class="text-green-400">Active</span></p>
-                        <p class="text-gray-400 text-sm">Next Run: Tomorrow 9:00 AM</p>
-                    </div>
-                    <div class="flex space-x-2 mt-3 md:mt-0">
-                        <button class="btn-secondary text-sm py-1 px-3 rounded-md view-details-btn" data-agent-id="1">View Details</button>
-                        <button class="btn-secondary text-sm py-1 px-3 rounded-md pause-btn" data-agent-id="1">Pause</button>
-                    </div>
-                </div>
-                <div class="p-4 bg-gray-800/50 rounded-lg border border-gray-700 flex flex-col md:flex-row justify-between items-start md:items-center" data-agent-id="2">
-                    <div>
-                        <h3 class="font-bold text-lg text-white">LinkedIn Content Generator (Marketing)</h3>
-                        <p class="text-gray-400 text-sm">Status: <span class="text-green-400">Active</span></p>
-                        <p class="text-400 text-sm">Next Run: Daily at 2:00 PM</p>
-                    </div>
-                    <div class="flex space-x-2 mt-3 md:mt-0">
-                        <button class="btn-secondary text-sm py-1 px-3 rounded-md view-details-btn" data-agent-id="2">View Details</button>
-                        <button class="btn-secondary text-sm py-1 px-3 rounded-md pause-btn" data-agent-id="2">Pause</button>
-                    </div>
-                </div>
-                <div class="p-4 bg-gray-800/50 rounded-lg border border-gray-700 flex flex-col md:flex-row justify-between items-start md:items-center" data-agent-id="3">
-                    <div>
-                        <h3 class="font-bold text-lg text-white">Research Summary Agent (Finance)</h3>
-                        <p class="text-gray-400 text-sm">Status: <span class="text-yellow-400">Paused</span></p>
-                        <p class="text-gray-400 text-sm">Last Run: 2025-07-15, 10:30 AM</p>
-                    </div>
-                    <div class="flex space-x-2 mt-3 md:mt-0">
-                        <button class="btn-secondary text-sm py-1 px-3 rounded-md view-details-btn" data-agent-id="3">View Details</button>
-                        <button class="btn-primary text-sm py-1 px-3 rounded-md activate-btn" data-agent-id="3">Activate</button>
-                    </div>
-                </div>
+            <div class="space-y-4" id="agent-list-container">
+                <p class="text-gray-400 text-center" id="no-agents-message">No agents found. Create a new one!</p>
             </div>
             <p class="text-gray-400 text-sm mt-6 text-center">
                 Looking for more AI solutions? Explore the full <a href="https://aigora.cloud" target="_blank" class="text-blue-400 hover:underline font-semibold">AIGORA Marketplace</a>.
@@ -162,39 +130,17 @@
                             <th class="py-2 px-4 font-medium">Date/Time</th>
                             <th class="py-2 px-4 font-medium">Status</th>
                             <th class="py-2 px-4 font-medium">Output</th>
+                            <th class="py-2 px-4 font-medium">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr class="border-b border-gray-800">
-                            <td class="py-2 px-4">Insight Pulse Agent</td>
-                            <td class="py-2 px-4">2025-07-20 09:00 AM</td>
-                            <td class="py-2 px-4 text-green-400">Completed</td>
-                            <td class="py-2 px-4">Email sent, LinkedIn post generated</td>
-                        </tr>
-                        <tr class="border-b border-gray-800">
-                            <td class="py-2 px-4">LinkedIn Content Generator</td>
-                            <td class="py-2 px-4">2025-07-20 02:00 PM</td>
-                            <td class="py-2 px-4 text-green-400">Completed</td>
-                            <td class="py-2 px-4">LinkedIn post generated</td>
-                        </tr>
-                        <tr class="border-b border-gray-800">
-                            <td class="py-2 px-4">Insight Pulse Agent</td>
-                            <td class="py-2 px-4">2025-07-19 09:00 AM</td>
-                            <td class="py-2 px-4 text-green-400">Completed</td>
-                            <td class="py-2 px-4">Email sent, LinkedIn post generated</td>
-                        </tr>
-                         <tr class="border-b border-gray-800">
-                            <td class="py-2 px-4">Research Summary Agent</td>
-                            <td class="py-2 px-4">2025-07-15 10:30 AM</td>
-                            <td class="py-2 px-4 text-yellow-400">Paused</td>
-                            <td class="py-2 px-4">No run due to pause</td>
-                        </tr>
+                    <tbody id="agent-runs-table-body">
+                        <tr><td colspan="5" class="text-center text-gray-500 py-4" id="no-runs-message">No recent runs. Agents run on schedule.</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </main>
-    
+
     <div id="agent-details-modal" class="modal-overlay hidden">
         <div class="modal-content w-full max-w-xl">
             <h2 class="text-2xl font-bold text-white mb-4">Agent Details: <span id="modal-agent-name"></span></h2>
@@ -241,189 +187,294 @@
         </div>
     </div>
 
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const agentDetailsModal = document.getElementById('agent-details-modal');
-            const pauseConfirmModal = document.getElementById('pause-confirm-modal');
-            const activateConfirmModal = document.getElementById('activate-confirm-modal');
+        document.addEventListener('DOMContentLoaded', async () => {
+            const accountEmail = document.getElementById('account-email');
+            const accountPlanType = document.getElementById('account-plan-type');
+            const accountApifyStatus = document.getElementById('account-apify-status');
+            const accountOpenAIStatus = document.getElementById('account-openai-status');
+            const agentListContainer = document.getElementById('agent-list-container');
+            const noAgentsMessage = document.getElementById('no-agents-message');
+            const agentRunsTableBody = document.getElementById('agent-runs-table-body');
+            const noRunsMessage = document.getElementById('no-runs-message');
+            const logoutBtn = document.getElementById('logout-btn');
 
+            // Modal elements
+            const agentDetailsModal = document.getElementById('agent-details-modal');
             const modalAgentName = document.getElementById('modal-agent-name');
-            const modalAgentType = document.getElementById('modal-agent-type'); // New element
+            const modalAgentType = document.getElementById('modal-agent-type');
             const modalAgentStatus = document.getElementById('modal-agent-status');
             const modalInfluencerUrls = document.getElementById('modal-influencer-urls');
-            const modalDigestTone = document.getElementById('modal-digest-tone'); // New element
-            const modalPostTone = document.getElementById('modal-post-tone'); // New element
-            const modalLastRun = document.getElementById('modal-last-run'); // New element
-            const modalNextRun = document.getElementById('modal-next-run'); // New element
+            const modalDigestTone = document.getElementById('modal-digest-tone');
+            const modalPostTone = document.getElementById('modal-post-tone');
+            const modalLastRun = document.getElementById('modal-last-run');
+            const modalNextRun = document.getElementById('modal-next-run');
+            const closeDetailsModalBtn = document.getElementById('close-details-modal');
 
-            const pauseAgentName = document.getElementById('pause-agent-name');
-            const activateAgentName = document.getElementById('activate-agent-name');
+            const pauseConfirmModal = document.getElementById('pause-confirm-modal');
+            const pauseAgentNameSpan = document.getElementById('pause-agent-name');
+            const cancelPauseBtn = document.getElementById('cancel-pause');
+            const confirmPauseBtn = document.getElementById('confirm-pause');
 
-            // Dummy Agent Data (in a real app, this would come from an API)
-            const agents = {
-                1: {
-                    name: "Insight Pulse Agent (Tech Influencers)",
-                    type: "Insight Pulse Agent", // Renamed
-                    status: "Active",
-                    nextRun: "Tomorrow 9:00 AM",
-                    lastRun: "2025-07-20 09:00 AM",
-                    urls: ["https://linkedin.com/in/techguru1", "https://linkedin.com/in/aiinnovator"],
-                    digestTone: "Professional & Insightful",
-                    postTone: "Formal & Engaging"
-                },
-                2: {
-                    name: "LinkedIn Content Generator (Marketing)",
-                    type: "LinkedIn Content Generator",
-                    status: "Active",
-                    nextRun: "Daily at 2:00 PM",
-                    lastRun: "2025-07-20 02:00 PM",
-                    urls: ["https://linkedin.com/in/marketingGuru"],
-                    digestTone: "Casual & Quick",
-                    postTone: "Bold & Contrarian"
-                },
-                3: {
-                    name: "Research Summary Agent (Finance)",
-                    type: "Research Summary Agent",
-                    status: "Paused",
-                    nextRun: "N/A",
-                    lastRun: "2025-07-15 10:30 AM",
-                    urls: ["https://linkedin.com/in/financeExpert"],
-                    digestTone: "Formal & Detailed",
-                    postTone: "Inspirational & Visionary"
+            const activateConfirmModal = document.getElementById('activate-confirm-modal');
+            const activateAgentNameSpan = document.getElementById('activate-agent-name');
+            const cancelActivateBtn = document.getElementById('cancel-activate');
+            const confirmActivateBtn = document.getElementById('confirm-activate');
+
+            let currentAgents = []; // To store fetched agent data
+
+            // --- Fetch User Info ---
+            async function fetchUserInfo() {
+                try {
+                    const user = await getCurrentUser(); // From api.js
+                    accountEmail.textContent = user.email;
+
+                    // Default statuses, will be refined by agent data
+                    accountApifyStatus.textContent = "Not Set";
+                    accountOpenAIStatus.textContent = "Not Set";
+                    accountPlanType.textContent = "Loading...";
+
+                } catch (error) {
+                    console.error('Error fetching user info:', error);
+                    // authenticatedFetch will redirect to login if token invalid
                 }
-            };
+            }
 
-            // Function to attach/re-attach button listeners
-            const attachAgentButtonListeners = () => {
-                // Remove existing listeners to prevent duplicates
-                document.querySelectorAll('.view-details-btn').forEach(btn => btn.removeEventListener('click', handleViewDetailsClick));
-                document.querySelectorAll('.pause-btn').forEach(btn => btn.removeEventListener('click', handlePauseClick));
-                document.querySelectorAll('.activate-btn').forEach(btn => btn.removeEventListener('click', handleActivateClick));
+            // --- Fetch Agent List ---
+            async function fetchAgentList() {
+                try {
+                    const agents = await getAllAgents(); // From api.js
+                    currentAgents = agents; // Store for modal details
 
-                // Attach new listeners
-                document.querySelectorAll('.view-details-btn').forEach(button => {
-                    button.addEventListener('click', handleViewDetailsClick);
-                });
-                document.querySelectorAll('.pause-btn').forEach(button => {
-                    button.addEventListener('click', handlePauseClick);
-                });
-                document.querySelectorAll('.activate-btn').forEach(button => {
-                    button.addEventListener('click', handleActivateClick);
-                });
-            };
+                    agentListContainer.innerHTML = ''; // Clear existing cards
+                    if (agents.length === 0) {
+                        noAgentsMessage.classList.remove('hidden');
+                        noRunsMessage.classList.remove('hidden'); // Show no runs message too
+                    } else {
+                        noAgentsMessage.classList.add('hidden');
+                        noRunsMessage.classList.add('hidden'); // Hide no runs message if agents found
+                        agentRunsTableBody.innerHTML = ''; // Clear existing run entries
 
-            // Event handler functions
-            const handleViewDetailsClick = (e) => {
-                const agentId = e.target.dataset.agentId;
-                const agent = agents[agentId];
+                        let firstAgentPlanType = "N/A"; // Default for account summary
+                        let hasApifyToken = false;
+                        let hasOpenAIToken = false;
 
-                if (agent) {
-                    modalAgentName.textContent = agent.name;
-                    modalAgentType.textContent = agent.type;
-                    modalAgentStatus.textContent = agent.status;
-                    modalAgentStatus.className = (agent.status === 'Active' ? 'text-green-400' : 'text-yellow-400'); // Update class based on status
-                    
-                    modalInfluencerUrls.innerHTML = '';
-                    agent.urls.forEach(url => {
+                        for (const agent of agents) {
+                            const agentCard = createAgentCard(agent);
+                            agentListContainer.appendChild(agentCard);
+
+                            // Get plan type and token status from first agent (or aggregate)
+                            if (firstAgentPlanType === "N/A") { // Only set from first agent for simplicity
+                                firstAgentPlanType = agent.config_data.plan || "N/A";
+                            }
+                            if (agent.apify_token) hasApifyToken = true;
+                            if (agent.openai_token) hasOpenAIToken = true;
+
+                            // Fetch and display runs for THIS agent
+                            await fetchAndRenderAgentRuns(agent.id, agent.agent_name);
+                        }
+                        accountPlanType.textContent = firstAgentPlanType;
+                        accountApifyStatus.textContent = hasApifyToken ? "Connected" : "Not Set";
+                        accountOpenAIStatus.textContent = hasOpenAIToken ? "Connected" : "Not Set";
+
+                        // If after fetching runs, the table is still empty, show no runs message
+                        if (agentRunsTableBody.children.length === 0) {
+                            noRunsMessage.classList.remove('hidden'); 
+                        }
+
+                    }
+                } catch (error) {
+                    console.error('Error fetching agent list:', error);
+                    // authenticatedFetch will redirect to login if token invalid
+                }
+            }
+
+            // --- Fetch and Render Agent Runs ---
+            async function fetchAndRenderAgentRuns(agentId, agentName) {
+                try {
+                    const runs = await getAgentRuns(agentId); // From api.js
+                    if (runs.length > 0) {
+                        runs.forEach(run => {
+                            const runRow = createRunRow(run, agentName);
+                            agentRunsTableBody.appendChild(runRow);
+                        });
+                        noRunsMessage.classList.add('hidden'); // Hide if runs are found
+                    }
+                } catch (error) {
+                    console.error(`Error fetching runs for agent ${agentName} (${agentId}):`, error);
+                }
+            }
+
+            // --- Create Agent Card HTML ---
+            function createAgentCard(agent) {
+                const statusClass = agent.status === 'active' ? 'text-green-400' : 'text-yellow-400';
+                const actionBtn = agent.status === 'active' ?
+                    `<button class="btn-secondary text-sm py-1 px-3 rounded-md pause-btn" data-agent-id="${agent.id}" data-agent-name="${agent.agent_name}">Pause</button>` :
+                    `<button class="btn-primary text-sm py-1 px-3 rounded-md activate-btn" data-agent-id="${agent.id}" data-agent-name="${agent.agent_name}">Activate</button>`;
+
+                const card = document.createElement('div');
+                card.className = 'p-4 bg-gray-800/50 rounded-lg border border-gray-700 flex flex-col md:flex-row justify-between items-start md:items-center';
+                card.setAttribute('data-agent-id', agent.id); // For easy selection
+
+                card.innerHTML = `
+                    <div>
+                        <h3 class="font-bold text-lg text-white">${agent.agent_name}</h3>
+                        <p class="text-gray-400 text-sm">Status: <span class="${statusClass}">${agent.status}</span></p>
+                        <p class="text-gray-400 text-sm">Plan: ${agent.config_data.plan}</p>
+                    </div>
+                    <div class="flex space-x-2 mt-3 md:mt-0">
+                        <button class="btn-secondary text-sm py-1 px-3 rounded-md view-details-btn" data-agent-id="${agent.id}">View Details</button>
+                        ${actionBtn}
+                        <button class="btn-secondary text-sm py-1 px-3 rounded-md delete-agent-btn" data-agent-id="${agent.id}" data-agent-name="${agent.agent_name}">Delete</button>
+                    </div>
+                `;
+                return card;
+            }
+
+            // --- Create Run Row HTML ---
+            function createRunRow(run, agentName) {
+                const row = document.createElement('tr');
+                const statusClass = run.status === 'completed' ? 'text-green-400' : (run.status === 'failed' ? 'text-red-400' : 'text-yellow-400');
+                const formattedTimestamp = new Date(run.timestamp).toLocaleString(); // Format date nicely
+
+                row.innerHTML = `
+                    <td class="py-2 px-4">${agentName}</td>
+                    <td class="py-2 px-4">${formattedTimestamp}</td>
+                    <td class="py-2 px-4"><span class="${statusClass}">${run.status}</span></td>
+                    <td class="py-2 px-4">${run.output_summary || 'N/A'}</td>
+                    <td class="py-2 px-4">
+                        ${run.generated_digest_url ? `<a href="${run.generated_digest_url}" target="_blank" class="text-blue-400 hover:underline">Digest</a>` : ''}
+                        ${run.generated_post_url ? `<a href="${run.generated_post_url}" target="_blank" class="text-blue-400 hover:underline ml-2">Post</a>` : ''}
+                    </td>
+                `;
+                return row;
+            }
+
+            // --- Modal Interaction Functions ---
+            function openDetailsModal(agent) {
+                modalAgentName.textContent = agent.agent_name;
+                modalAgentType.textContent = "Insight Pulse Agent"; // Hardcoded for now
+                modalAgentStatus.textContent = agent.status;
+                modalAgentStatus.className = (agent.status === 'active' ? 'text-green-400' : 'text-yellow-400');
+
+                modalInfluencerUrls.innerHTML = '';
+                if (agent.config_data.linkedin_urls && agent.config_data.linkedin_urls.length > 0) {
+                    agent.config_data.linkedin_urls.forEach(url => {
                         const li = document.createElement('li');
                         li.textContent = url;
                         modalInfluencerUrls.appendChild(li);
                     });
-                    modalDigestTone.textContent = agent.digestTone;
-                    modalPostTone.textContent = agent.postTone;
-                    modalLastRun.textContent = agent.lastRun;
-                    modalNextRun.textContent = agent.nextRun;
-
-                    agentDetailsModal.classList.remove('hidden');
+                } else {
+                    const li = document.createElement('li');
+                    li.textContent = "None provided.";
+                    modalInfluencerUrls.appendChild(li);
                 }
-            };
 
-            const handlePauseClick = (e) => {
-                const agentId = e.target.dataset.agentId;
-                const agent = agents[agentId];
-                if (agent) {
-                    pauseAgentName.textContent = agent.name;
-                    pauseConfirmModal.dataset.agentId = agentId; // Store agent ID for confirmation
-                    pauseConfirmModal.classList.remove('hidden');
-                }
-            };
+                modalDigestTone.textContent = agent.config_data.digest_tone || 'N/A';
+                modalPostTone.textContent = agent.config_data.post_tone || 'N/A';
+                modalLastRun.textContent = agent.last_run_at || 'Never'; // These fields are not in BFF's AgentResponse, will be empty
+                modalNextRun.textContent = agent.next_run_at || 'On Schedule'; // These fields are not in BFF's AgentResponse, will be empty
 
-            const handleActivateClick = (e) => {
-                const agentId = e.target.dataset.agentId;
-                const agent = agents[agentId];
-                if (agent) {
-                    activateAgentName.textContent = agent.name;
-                    activateConfirmModal.dataset.agentId = agentId; // Store agent ID for confirmation
-                    activateConfirmModal.classList.remove('hidden');
-                }
-            };
+                agentDetailsModal.classList.remove('hidden');
+            }
 
-            // Initial attachment of listeners
-            attachAgentButtonListeners();
-
-            // Close Agent Details Modal
-            document.getElementById('close-details-modal').addEventListener('click', () => {
+            function closeDetailsModal() {
                 agentDetailsModal.classList.add('hidden');
-            });
+            }
 
-            // Confirm Pause Action
-            document.getElementById('confirm-pause').addEventListener('click', () => {
-                const agentId = pauseConfirmModal.dataset.agentId;
-                // In a real application, you'd send an API call to pause the agent
-                alert(`Agent "${agents[agentId].name}" paused successfully! (Demo action)`);
-                agents[agentId].status = 'Paused'; // Update dummy data
-                // Update the status on the dashboard UI (e.g., change button text, status text)
-                const agentCard = document.querySelector(`[data-agent-id="${agentId}"]`);
-                if (agentCard) {
-                    const statusSpan = agentCard.querySelector('[data-agent-id="' + agentId + '"] span'); // Targeting the span for status
-                    if (statusSpan) {
-                         statusSpan.textContent = 'Paused';
-                         statusSpan.classList.remove('text-green-400');
-                         statusSpan.classList.add('text-yellow-400');
-                    }
-                    const pauseBtn = agentCard.querySelector('.pause-btn');
-                    if (pauseBtn) {
-                        pauseBtn.outerHTML = `<button class="btn-primary text-sm py-1 px-3 rounded-md activate-btn" data-agent-id="${agentId}">Activate</button>`;
-                    }
-                    attachAgentButtonListeners(); // Re-attach listeners after DOM modification
-                }
+            function openPauseConfirmModal(agentId, agentName) {
+                pauseAgentNameSpan.textContent = agentName;
+                confirmPauseBtn.setAttribute('data-agent-id', agentId);
+                pauseConfirmModal.classList.remove('hidden');
+            }
+
+            function closePauseConfirmModal() {
                 pauseConfirmModal.classList.add('hidden');
-            });
+            }
 
-            // Cancel Pause Action
-            document.getElementById('cancel-pause').addEventListener('click', () => {
-                pauseConfirmModal.classList.add('hidden');
-            });
+            function openActivateConfirmModal(agentId, agentName) {
+                activateAgentNameSpan.textContent = agentName;
+                confirmActivateBtn.setAttribute('data-agent-id', agentId);
+                activateConfirmModal.classList.remove('hidden');
+            }
 
-            // Confirm Activate Action
-            document.getElementById('confirm-activate').addEventListener('click', () => {
-                const agentId = activateConfirmModal.dataset.agentId;
-                // In a real application, you'd send an API call to activate the agent
-                alert(`Agent "${agents[agentId].name}" activated successfully! (Demo action)`);
-                agents[agentId].status = 'Active'; // Update dummy data
-                const agentCard = document.querySelector(`[data-agent-id="${agentId}"]`);
-                if (agentCard) {
-                    const statusSpan = agentCard.querySelector('[data-agent-id="' + agentId + '"] span'); // Targeting the span for status
-                    if (statusSpan) {
-                         statusSpan.textContent = 'Active';
-                         statusSpan.classList.remove('text-yellow-400');
-                         statusSpan.classList.add('text-green-400');
+            function closeActivateConfirmModal() {
+                activateConfirmModal.classList.add('hidden');
+            }
+
+            // --- Event Delegation for Agent Card Buttons ---
+            agentListContainer.addEventListener('click', async (e) => {
+                const target = e.target;
+                const agentId = target.dataset.agentId;
+                const agentName = target.dataset.agentName;
+                const agent = currentAgents.find(a => a.id == agentId); // Find agent from cache
+
+                if (!agentId) return; // Not an agent button
+
+                if (target.classList.contains('view-details-btn')) {
+                    if (agent) openDetailsModal(agent);
+                } else if (target.classList.contains('pause-btn')) {
+                    openPauseConfirmModal(agentId, agentName);
+                } else if (target.classList.contains('activate-btn')) {
+                    openActivateConfirmModal(agentId, agentName);
+                } else if (target.classList.contains('delete-agent-btn')) {
+                    if (confirm(`Are you sure you want to delete "${agentName}"? This action cannot be undone.`)) {
+                        try {
+                            await deleteAgent(agentId); // From api.js
+                            alert(`${agentName} deleted successfully!`);
+                            fetchAgentList(); // Refresh list
+                        } catch (error) {
+                            console.error('Error deleting agent:', error);
+                        }
                     }
-                    const activateBtn = agentCard.querySelector('.activate-btn');
-                    if (activateBtn) {
-                        activateBtn.outerHTML = `<button class="btn-secondary text-sm py-1 px-3 rounded-md pause-btn" data-agent-id="${agentId}">Pause</button>`;
-                    }
-                    attachAgentButtonListeners(); // Re-attach listeners after DOM modification
                 }
-                activateConfirmModal.classList.add('hidden');
             });
 
-            // Cancel Activate Action
-            document.getElementById('cancel-activate').addEventListener('click', () => {
-                activateConfirmModal.classList.add('hidden');
+            closeDetailsModalBtn.addEventListener('click', closeDetailsModal);
+            cancelPauseBtn.addEventListener('click', closePauseConfirmModal);
+            cancelActivateBtn.addEventListener('click', closeActivateConfirmModal);
+
+            confirmPauseBtn.addEventListener('click', async (e) => {
+                const agentId = e.target.dataset.agentId;
+                try {
+                    await updateAgentStatus(agentId, 'paused'); // From api.js
+                    alert('Agent paused successfully!');
+                    closePauseConfirmModal();
+                    fetchAgentList(); // Refresh list
+                } catch (error) {
+                    console.error('Error pausing agent:', error);
+                }
             });
+
+            confirmActivateBtn.addEventListener('click', async (e) => {
+                const agentId = e.target.dataset.agentId;
+                try {
+                    await updateAgentStatus(agentId, 'active'); // From api.js
+                    alert('Agent activated successfully!');
+                    closeActivateConfirmModal();
+                    fetchAgentList(); // Refresh list
+                } catch (error) {
+                    console.error('Error activating agent:', error);
+                }
+            });
+
+            // --- Logout Functionality ---
+            logoutBtn.addEventListener('click', () => {
+                removeAccessToken(); // From api.js
+                window.location.href = 'index.html'; // Redirect to home page
+            });
+
+            // Initial data load on page load
+            // Ensure user is authenticated before attempting to fetch
+            if (getAccessToken()) { // Check if token exists
+                fetchUserInfo();
+                fetchAgentList();
+            } else {
+                window.location.href = 'login.html'; // Redirect to login if no token
+            }
         });
     </script>
-    <script src="js/utils.js"></script>
 </body>
 </html>

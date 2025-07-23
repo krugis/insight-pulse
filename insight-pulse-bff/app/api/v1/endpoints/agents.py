@@ -85,3 +85,14 @@ async def create_ai_agent(
     )
 
     return db_agent # This will correctly return AgentResponse as config_data is now filled
+
+@router.get("/", response_model=List[AgentResponse], tags=["Agents"])
+async def get_all_agents_for_user(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db_session)
+):
+    """
+    Retrieve all AI agents belonging to the current authenticated user.
+    """
+    agents = crud_agent.get_user_agents(db, user_id=current_user.id)
+    return agents
