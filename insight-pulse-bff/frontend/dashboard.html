@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AIGORA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* bg-gray-900 */
+        }
+        .glass-effect {
+            background: rgba(31, 41, 55, 0.5); /* bg-gray-800 with opacity */
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .btn-primary {
+            background-color: #2563eb; /* bg-blue-600 */
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #1d4ed8; /* bg-blue-700 */
+        }
+        .btn-secondary {
+            background-color: #374151; /* bg-gray-700 */
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #4b5563; /* bg-gray-600 */
+        }
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            color: #d1d5db; /* text-gray-300 */
+            background-color: #374151; /* bg-gray-700 */
+        }
+        .tab-button.active {
+            background-color: #2563eb; /* bg-blue-600 */
+            color: white;
+        }
+        /* Modal specific styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: rgba(31, 41, 55, 0.8); /* bg-gray-800 with slight more opacity */
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            max-width: 90%;
+            width: 500px;
+            color: #d1d5db;
+        }
+    </style>
+</head>
+<body class="text-gray-200 min-h-screen flex flex-col items-center p-4 pt-20">
+
+    <header class="absolute top-0 left-0 w-full p-6 flex justify-between items-center">
+        <a href="index.html" class="flex items-center space-x-2">
+            <span class="text-2xl font-bold text-white">AIGORA</span>
+        </a>
+        <nav>
+            <ul class="flex space-x-4">
+                <li><a href="dashboard.html" class="text-blue-400 font-semibold hover:text-blue-300">Dashboard</a></li>
+                <li><a href="create-agent.html" class="text-gray-300 hover:text-white">Create New Agent</a></li>
+                <li><a href="https://aigora.cloud" target="_blank" class="text-gray-300 hover:text-white">Marketplace</a></li>
+                <li><a href="settings.html" class="text-gray-300 hover:text-white">Settings</a></li>
+                <li><a href="index.html" class="text-gray-300 hover:text-white">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="w-full max-w-4xl mt-8">
+        <h1 class="text-3xl font-bold text-white mb-6">Your AIGORA Dashboard</h1>
+
+        <div class="glass-effect rounded-2xl p-6 mb-8 shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-white">Account Information</h2>
+                <a href="manage-account.html" class="btn-secondary font-semibold py-2 px-4 rounded-lg">Manage Account</a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-300">
+                <div>
+                    <p><span class="font-medium text-gray-400">Email:</span> user@example.com</p>
+                    <p><span class="font-medium text-gray-400">Plan Type:</span> Subscribe</p>
+                </div>
+                <div>
+                    <p><span class="font-medium text-gray-400">Apify API Token:</span> Connected</p>
+                    <p><span class="font-medium text-gray-400">OpenAI API Token:</span> Connected</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-effect rounded-2xl p-6 mb-8 shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-white">Your AI Agents</h2>
+                <a href="create-agent.html" class="btn-primary font-semibold py-2 px-4 rounded-lg">New Agent</a>
+            </div>
+            <div class="space-y-4" id="agent-list">
+                <div class="p-4 bg-gray-800/50 rounded-lg border border-gray-700 flex flex-col md:flex-row justify-between items-start md:items-center" data-agent-id="1">
+                    <div>
+                        <h3 class="font-bold text-lg text-white">Insight Pulse Agent (Tech Influencers)</h3>
+                        <p class="text-gray-400 text-sm">Status: <span class="text-green-400">Active</span></p>
+                        <p class="text-gray-400 text-sm">Next Run: Tomorrow 9:00 AM</p>
+                    </div>
+                    <div class="flex space-x-2 mt-3 md:mt-0">
+                        <button class="btn-secondary text-sm py-1 px-3 rounded-md view-details-btn" data-agent-id="1">View Details</button>
+                        <button class="btn-secondary text-sm py-1 px-3 rounded-md pause-btn" data-agent-id="1">Pause</button>
+                    </div>
+                </div>
+                <div class="p-4 bg-gray-800/50 rounded-lg border border-gray-700 flex flex-col md:flex-row justify-between items-start md:items-center" data-agent-id="2">
+                    <div>
+                        <h3 class="font-bold text-lg text-white">LinkedIn Content Generator (Marketing)</h3>
+                        <p class="text-gray-400 text-sm">Status: <span class="text-green-400">Active</span></p>
+                        <p class="text-400 text-sm">Next Run: Daily at 2:00 PM</p>
+                    </div>
+                    <div class="flex space-x-2 mt-3 md:mt-0">
+                        <button class="btn-secondary text-sm py-1 px-3 rounded-md view-details-btn" data-agent-id="2">View Details</button>
+                        <button class="btn-secondary text-sm py-1 px-3 rounded-md pause-btn" data-agent-id="2">Pause</button>
+                    </div>
+                </div>
+                <div class="p-4 bg-gray-800/50 rounded-lg border border-gray-700 flex flex-col md:flex-row justify-between items-start md:items-center" data-agent-id="3">
+                    <div>
+                        <h3 class="font-bold text-lg text-white">Research Summary Agent (Finance)</h3>
+                        <p class="text-gray-400 text-sm">Status: <span class="text-yellow-400">Paused</span></p>
+                        <p class="text-gray-400 text-sm">Last Run: 2025-07-15, 10:30 AM</p>
+                    </div>
+                    <div class="flex space-x-2 mt-3 md:mt-0">
+                        <button class="btn-secondary text-sm py-1 px-3 rounded-md view-details-btn" data-agent-id="3">View Details</button>
+                        <button class="btn-primary text-sm py-1 px-3 rounded-md activate-btn" data-agent-id="3">Activate</button>
+                    </div>
+                </div>
+            </div>
+            <p class="text-gray-400 text-sm mt-6 text-center">
+                Looking for more AI solutions? Explore the full <a href="https://aigora.cloud" target="_blank" class="text-blue-400 hover:underline font-semibold">AIGORA Marketplace</a>.
+            </p>
+        </div>
+
+        <div class="glass-effect rounded-2xl p-6 shadow-lg">
+            <h2 class="text-xl font-semibold text-white mb-4">Recent Agent Runs</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-left text-gray-300">
+                    <thead>
+                        <tr class="border-b border-gray-700">
+                            <th class="py-2 px-4 font-medium">Agent Name</th>
+                            <th class="py-2 px-4 font-medium">Date/Time</th>
+                            <th class="py-2 px-4 font-medium">Status</th>
+                            <th class="py-2 px-4 font-medium">Output</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-800">
+                            <td class="py-2 px-4">Insight Pulse Agent</td>
+                            <td class="py-2 px-4">2025-07-20 09:00 AM</td>
+                            <td class="py-2 px-4 text-green-400">Completed</td>
+                            <td class="py-2 px-4">Email sent, LinkedIn post generated</td>
+                        </tr>
+                        <tr class="border-b border-gray-800">
+                            <td class="py-2 px-4">LinkedIn Content Generator</td>
+                            <td class="py-2 px-4">2025-07-20 02:00 PM</td>
+                            <td class="py-2 px-4 text-green-400">Completed</td>
+                            <td class="py-2 px-4">LinkedIn post generated</td>
+                        </tr>
+                        <tr class="border-b border-gray-800">
+                            <td class="py-2 px-4">Insight Pulse Agent</td>
+                            <td class="py-2 px-4">2025-07-19 09:00 AM</td>
+                            <td class="py-2 px-4 text-green-400">Completed</td>
+                            <td class="py-2 px-4">Email sent, LinkedIn post generated</td>
+                        </tr>
+                         <tr class="border-b border-gray-800">
+                            <td class="py-2 px-4">Research Summary Agent</td>
+                            <td class="py-2 px-4">2025-07-15 10:30 AM</td>
+                            <td class="py-2 px-4 text-yellow-400">Paused</td>
+                            <td class="py-2 px-4">No run due to pause</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+    
+    <div id="agent-details-modal" class="modal-overlay hidden">
+        <div class="modal-content w-full max-w-xl">
+            <h2 class="text-2xl font-bold text-white mb-4">Agent Details: <span id="modal-agent-name"></span></h2>
+            <div class="space-y-3 text-gray-300">
+                <p><span class="font-medium text-gray-400">Agent Type:</span> <span id="modal-agent-type"></span></p>
+                <p><span class="font-medium text-gray-400">Status:</span> <span id="modal-agent-status"></span></p>
+                <p><span class="font-medium text-gray-400">Current Influencer URLs:</span></p>
+                <ul class="list-disc list-inside ml-4" id="modal-influencer-urls">
+                    </ul>
+                <p><span class="font-medium text-gray-400">Digest Tone:</span> <span id="modal-digest-tone"></span></p>
+                <p><span class="font-medium text-gray-400">LinkedIn Post Tone:</span> <span id="modal-post-tone"></span></p>
+                <p><span class="font-medium text-gray-400">Last Run:</span> <span id="modal-last-run"></span></p>
+                <p><span class="font-medium text-gray-400">Next Run:</span> <span id="modal-next-run"></span></p>
+            </div>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button class="btn-secondary py-2 px-4 rounded-lg" id="close-details-modal">Close</button>
+                <button class="btn-primary py-2 px-4 rounded-lg">Edit Agent</button>
+                <button class="btn-primary py-2 px-4 rounded-lg delete-agent-btn">Delete Agent</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pause-confirm-modal" class="modal-overlay hidden">
+        <div class="modal-content text-center">
+            <h2 class="text-2xl font-bold text-white mb-4">Confirm Pause</h2>
+            <p class="text-gray-300 mb-6">Are you sure you want to pause "<span id="pause-agent-name" class="font-semibold"></span>"?</p>
+            <p class="text-gray-400 text-sm">You can reactivate it anytime from the agent details.</p>
+            <div class="mt-8 flex justify-center space-x-4">
+                <button class="btn-secondary py-2 px-5 rounded-lg" id="cancel-pause">Cancel</button>
+                <button class="btn-primary py-2 px-5 rounded-lg" id="confirm-pause">Pause Agent</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="activate-confirm-modal" class="modal-overlay hidden">
+        <div class="modal-content text-center">
+            <h2 class="text-2xl font-bold text-white mb-4">Confirm Activation</h2>
+            <p class="text-gray-300 mb-6">Are you sure you want to activate "<span id="activate-agent-name" class="font-semibold"></span>"?</p>
+            <p class="text-gray-400 text-sm">It will resume its scheduled runs.</p>
+            <div class="mt-8 flex justify-center space-x-4">
+                <button class="btn-secondary py-2 px-5 rounded-lg" id="cancel-activate">Cancel</button>
+                <button class="btn-primary py-2 px-5 rounded-lg" id="confirm-activate">Activate Agent</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const agentDetailsModal = document.getElementById('agent-details-modal');
+            const pauseConfirmModal = document.getElementById('pause-confirm-modal');
+            const activateConfirmModal = document.getElementById('activate-confirm-modal');
+
+            const modalAgentName = document.getElementById('modal-agent-name');
+            const modalAgentType = document.getElementById('modal-agent-type'); // New element
+            const modalAgentStatus = document.getElementById('modal-agent-status');
+            const modalInfluencerUrls = document.getElementById('modal-influencer-urls');
+            const modalDigestTone = document.getElementById('modal-digest-tone'); // New element
+            const modalPostTone = document.getElementById('modal-post-tone'); // New element
+            const modalLastRun = document.getElementById('modal-last-run'); // New element
+            const modalNextRun = document.getElementById('modal-next-run'); // New element
+
+            const pauseAgentName = document.getElementById('pause-agent-name');
+            const activateAgentName = document.getElementById('activate-agent-name');
+
+            // Dummy Agent Data (in a real app, this would come from an API)
+            const agents = {
+                1: {
+                    name: "Insight Pulse Agent (Tech Influencers)",
+                    type: "Insight Pulse Agent", // Renamed
+                    status: "Active",
+                    nextRun: "Tomorrow 9:00 AM",
+                    lastRun: "2025-07-20 09:00 AM",
+                    urls: ["https://linkedin.com/in/techguru1", "https://linkedin.com/in/aiinnovator"],
+                    digestTone: "Professional & Insightful",
+                    postTone: "Formal & Engaging"
+                },
+                2: {
+                    name: "LinkedIn Content Generator (Marketing)",
+                    type: "LinkedIn Content Generator",
+                    status: "Active",
+                    nextRun: "Daily at 2:00 PM",
+                    lastRun: "2025-07-20 02:00 PM",
+                    urls: ["https://linkedin.com/in/marketingGuru"],
+                    digestTone: "Casual & Quick",
+                    postTone: "Bold & Contrarian"
+                },
+                3: {
+                    name: "Research Summary Agent (Finance)",
+                    type: "Research Summary Agent",
+                    status: "Paused",
+                    nextRun: "N/A",
+                    lastRun: "2025-07-15 10:30 AM",
+                    urls: ["https://linkedin.com/in/financeExpert"],
+                    digestTone: "Formal & Detailed",
+                    postTone: "Inspirational & Visionary"
+                }
+            };
+
+            // Function to attach/re-attach button listeners
+            const attachAgentButtonListeners = () => {
+                // Remove existing listeners to prevent duplicates
+                document.querySelectorAll('.view-details-btn').forEach(btn => btn.removeEventListener('click', handleViewDetailsClick));
+                document.querySelectorAll('.pause-btn').forEach(btn => btn.removeEventListener('click', handlePauseClick));
+                document.querySelectorAll('.activate-btn').forEach(btn => btn.removeEventListener('click', handleActivateClick));
+
+                // Attach new listeners
+                document.querySelectorAll('.view-details-btn').forEach(button => {
+                    button.addEventListener('click', handleViewDetailsClick);
+                });
+                document.querySelectorAll('.pause-btn').forEach(button => {
+                    button.addEventListener('click', handlePauseClick);
+                });
+                document.querySelectorAll('.activate-btn').forEach(button => {
+                    button.addEventListener('click', handleActivateClick);
+                });
+            };
+
+            // Event handler functions
+            const handleViewDetailsClick = (e) => {
+                const agentId = e.target.dataset.agentId;
+                const agent = agents[agentId];
+
+                if (agent) {
+                    modalAgentName.textContent = agent.name;
+                    modalAgentType.textContent = agent.type;
+                    modalAgentStatus.textContent = agent.status;
+                    modalAgentStatus.className = (agent.status === 'Active' ? 'text-green-400' : 'text-yellow-400'); // Update class based on status
+                    
+                    modalInfluencerUrls.innerHTML = '';
+                    agent.urls.forEach(url => {
+                        const li = document.createElement('li');
+                        li.textContent = url;
+                        modalInfluencerUrls.appendChild(li);
+                    });
+                    modalDigestTone.textContent = agent.digestTone;
+                    modalPostTone.textContent = agent.postTone;
+                    modalLastRun.textContent = agent.lastRun;
+                    modalNextRun.textContent = agent.nextRun;
+
+                    agentDetailsModal.classList.remove('hidden');
+                }
+            };
+
+            const handlePauseClick = (e) => {
+                const agentId = e.target.dataset.agentId;
+                const agent = agents[agentId];
+                if (agent) {
+                    pauseAgentName.textContent = agent.name;
+                    pauseConfirmModal.dataset.agentId = agentId; // Store agent ID for confirmation
+                    pauseConfirmModal.classList.remove('hidden');
+                }
+            };
+
+            const handleActivateClick = (e) => {
+                const agentId = e.target.dataset.agentId;
+                const agent = agents[agentId];
+                if (agent) {
+                    activateAgentName.textContent = agent.name;
+                    activateConfirmModal.dataset.agentId = agentId; // Store agent ID for confirmation
+                    activateConfirmModal.classList.remove('hidden');
+                }
+            };
+
+            // Initial attachment of listeners
+            attachAgentButtonListeners();
+
+            // Close Agent Details Modal
+            document.getElementById('close-details-modal').addEventListener('click', () => {
+                agentDetailsModal.classList.add('hidden');
+            });
+
+            // Confirm Pause Action
+            document.getElementById('confirm-pause').addEventListener('click', () => {
+                const agentId = pauseConfirmModal.dataset.agentId;
+                // In a real application, you'd send an API call to pause the agent
+                alert(`Agent "${agents[agentId].name}" paused successfully! (Demo action)`);
+                agents[agentId].status = 'Paused'; // Update dummy data
+                // Update the status on the dashboard UI (e.g., change button text, status text)
+                const agentCard = document.querySelector(`[data-agent-id="${agentId}"]`);
+                if (agentCard) {
+                    const statusSpan = agentCard.querySelector('[data-agent-id="' + agentId + '"] span'); // Targeting the span for status
+                    if (statusSpan) {
+                         statusSpan.textContent = 'Paused';
+                         statusSpan.classList.remove('text-green-400');
+                         statusSpan.classList.add('text-yellow-400');
+                    }
+                    const pauseBtn = agentCard.querySelector('.pause-btn');
+                    if (pauseBtn) {
+                        pauseBtn.outerHTML = `<button class="btn-primary text-sm py-1 px-3 rounded-md activate-btn" data-agent-id="${agentId}">Activate</button>`;
+                    }
+                    attachAgentButtonListeners(); // Re-attach listeners after DOM modification
+                }
+                pauseConfirmModal.classList.add('hidden');
+            });
+
+            // Cancel Pause Action
+            document.getElementById('cancel-pause').addEventListener('click', () => {
+                pauseConfirmModal.classList.add('hidden');
+            });
+
+            // Confirm Activate Action
+            document.getElementById('confirm-activate').addEventListener('click', () => {
+                const agentId = activateConfirmModal.dataset.agentId;
+                // In a real application, you'd send an API call to activate the agent
+                alert(`Agent "${agents[agentId].name}" activated successfully! (Demo action)`);
+                agents[agentId].status = 'Active'; // Update dummy data
+                const agentCard = document.querySelector(`[data-agent-id="${agentId}"]`);
+                if (agentCard) {
+                    const statusSpan = agentCard.querySelector('[data-agent-id="' + agentId + '"] span'); // Targeting the span for status
+                    if (statusSpan) {
+                         statusSpan.textContent = 'Active';
+                         statusSpan.classList.remove('text-yellow-400');
+                         statusSpan.classList.add('text-green-400');
+                    }
+                    const activateBtn = agentCard.querySelector('.activate-btn');
+                    if (activateBtn) {
+                        activateBtn.outerHTML = `<button class="btn-secondary text-sm py-1 px-3 rounded-md pause-btn" data-agent-id="${agentId}">Pause</button>`;
+                    }
+                    attachAgentButtonListeners(); // Re-attach listeners after DOM modification
+                }
+                activateConfirmModal.classList.add('hidden');
+            });
+
+            // Cancel Activate Action
+            document.getElementById('cancel-activate').addEventListener('click', () => {
+                activateConfirmModal.classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>

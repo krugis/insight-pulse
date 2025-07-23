@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Account - AIGORA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* bg-gray-900 */
+        }
+        .glass-effect {
+            background: rgba(31, 41, 55, 0.5); /* bg-gray-800 with opacity */
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .form-input {
+            background-color: #1f2937; /* bg-gray-800 */
+            border-color: #4b5563; /* border-gray-600 */
+            color: #d1d5db; /* text-gray-300 */
+        }
+        .form-input:focus {
+            border-color: #3b82f6; /* border-blue-500 */
+            ring-color: #3b82f6;
+            --tw-ring-opacity: 0.5;
+        }
+        .btn-primary {
+            background-color: #2563eb; /* bg-blue-600 */
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #1d4ed8; /* bg-blue-700 */
+        }
+        .btn-secondary {
+            background-color: #374151; /* bg-gray-700 */
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #4b5563; /* bg-gray-600 */
+        }
+    </style>
+</head>
+<body class="text-gray-200 min-h-screen flex flex-col items-center p-4 pt-20">
+
+    <header class="absolute top-0 left-0 w-full p-6 flex justify-between items-center">
+        <a href="index.html" class="flex items-center space-x-2">
+            <span class="text-2xl font-bold text-white">Insight Pulse</span>
+        </a>
+        <nav>
+            <ul class="flex space-x-4">
+                <li><a href="dashboard.html" class="text-gray-300 hover:text-white">Dashboard</a></li>
+                <li><a href="create-agent.html" class="text-gray-300 hover:text-white">Create New Agent</a></li>
+                <li><a href="settings.html" class="text-gray-300 hover:text-white">Settings</a></li>
+                <li><a href="index.html" class="text-gray-300 hover:text-white">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="w-full max-w-2xl mt-8">
+        <div class="glass-effect rounded-2xl p-8 shadow-2xl">
+            <h1 class="text-3xl font-bold text-white mb-6 text-center">Manage Your Account</h1>
+            
+            <form>
+                <div class="space-y-6">
+                    <div>
+                        <label for="current-email" class="block text-sm font-medium text-gray-300">Current Email Address</label>
+                        <input type="email" id="current-email" name="current-email" class="form-input mt-1 block w-full rounded-md shadow-sm" value="user@example.com" readonly>
+                    </div>
+                    <div>
+                        <label for="new-email" class="block text-sm font-medium text-gray-300">New Email Address (optional)</label>
+                        <input type="email" id="new-email" name="new-email" class="form-input mt-1 block w-full rounded-md shadow-sm" placeholder="Enter new email">
+                    </div>
+                    <div>
+                        <label for="current-password" class="block text-sm font-medium text-gray-300">Current Password</label>
+                        <input type="password" id="current-password" name="current-password" required class="form-input mt-1 block w-full rounded-md shadow-sm" placeholder="Enter current password">
+                    </div>
+                    <div>
+                        <label for="new-password" class="block text-sm font-medium text-gray-300">New Password (optional)</label>
+                        <input type="password" id="new-password" name="new-password" class="form-input mt-1 block w-full rounded-md shadow-sm" placeholder="Enter new password">
+                    </div>
+                    <div>
+                        <label for="confirm-new-password" class="block text-sm font-medium text-gray-300">Confirm New Password</label>
+                        <input type="password" id="confirm-new-password" name="confirm-new-password" class="form-input mt-1 block w-full rounded-md shadow-sm" placeholder="Confirm new password">
+                    </div>
+
+                    <div class="border-t border-gray-700 pt-6">
+                        <h3 class="text-lg font-semibold text-white mb-3">Plan Information</h3>
+                        <p class="text-gray-300"><span class="font-medium text-gray-400">Current Plan:</span> Subscribe ($10/month)</p>
+                        <p class="text-gray-300 mt-2">Manage your subscription via Stripe <a href="#" class="text-blue-400 hover:underline">(Link)</a></p>
+                    </div>
+
+                    <div id="api-keys-section" class="border-t border-gray-700 pt-6 hidden">
+                        <h3 class="text-lg font-semibold text-white mb-3">API Keys</h3>
+                        <div>
+                            <label for="apify-token" class="block text-sm font-medium text-gray-300">Apify API Token</label>
+                            <input type="password" id="apify-token" name="apify-token" class="form-input mt-1 block w-full rounded-md shadow-sm" placeholder="apify_api_...">
+                            <p class="text-gray-500 text-xs mt-1">Status: Connected</p>
+                        </div>
+                        <div class="mt-4">
+                            <label for="openai-token" class="block text-sm font-medium text-gray-300">OpenAI API Token</label>
+                            <input type="password" id="openai-token" name="openai-token" class="form-input mt-1 block w-full rounded-md shadow-sm" placeholder="sk-...">
+                            <p class="text-gray-500 text-xs mt-1">Status: Connected</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-8 flex justify-between">
+                    <a href="dashboard.html" class="btn-secondary font-semibold py-2 px-6 rounded-lg">Back to Dashboard</a>
+                    <button type="submit" class="btn-primary font-semibold py-2 px-6 rounded-lg">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Simulate plan type - in a real app, this would come from backend
+            const userPlan = 'subscribe'; // or 'byok'
+            if (userPlan === 'byok') {
+                document.getElementById('api-keys-section').classList.remove('hidden');
+            }
+
+            document.querySelector('form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const currentPassword = document.getElementById('current-password').value;
+                const newPassword = document.getElementById('new-password').value;
+                const confirmNewPassword = document.getElementById('confirm-new-password').value;
+
+                if (newPassword && newPassword !== confirmNewPassword) {
+                    alert("New passwords do not match!");
+                    return;
+                }
+                if (newPassword && newPassword.length < 6) {
+                    alert("New password must be at least 6 characters long.");
+                    return;
+                }
+                
+                // Simulate saving changes
+                alert("Account changes saved successfully! (Demo action)");
+                // In a real app, you'd send data to server and handle response
+                // window.location.href = 'dashboard.html'; // Redirect after real save
+            });
+        });
+    </script>
+    
+</body>
+</html>
