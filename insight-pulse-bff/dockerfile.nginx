@@ -1,0 +1,26 @@
+# Dockerfile.nginx
+
+# Use the official Nginx image as the base
+FROM nginx:alpine
+
+# Remove default Nginx configuration
+RUN rm /etc/nginx/conf.d/default.conf
+
+# Copy your custom Nginx configuration file into the container
+# This file will be mounted from your local 'nginx' directory by docker-compose
+# For development, we'll use a volume mount, so this COPY is less critical
+# but good for production build where you might bake it in.
+# COPY ./nginx/nginx.conf /etc/nginx/conf.d/default.conf
+
+# The frontend files will also be mounted as a volume by docker-compose
+# For a production build, you might copy them here:
+# COPY ./frontend /usr/share/nginx/html
+
+# Expose port 80 for HTTP traffic (Nginx listens on this)
+EXPOSE 80
+
+# Expose port 443 for HTTPS traffic (if you enable it)
+EXPOSE 443
+
+# Command to run Nginx (default command of the base image is usually sufficient)
+CMD ["nginx", "-g", "daemon off;"]

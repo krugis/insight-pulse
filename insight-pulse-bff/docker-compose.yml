@@ -4,7 +4,7 @@ services:
   nginx: # NEW SERVICE: Nginx reverse proxy
     build:
       context: .             # Build context is the current directory
-      dockerfile: Dockerfile.nginx # Use the new Dockerfile.nginx
+      dockerfile: dockerfile.nginx # Use the new Dockerfile.nginx
     ports:
       - "80:80"   # Expose Nginx on host port 80 (HTTP)
       # - "443:443" # Uncomment and configure for HTTPS in production
@@ -59,4 +59,4 @@ volumes:
 networks:
   pulse_net: # Define a custom network for inter-service communication
     driver: bridge
-    external: true
+    #external: true

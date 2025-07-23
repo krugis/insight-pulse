@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     #PULSE_INGEST_BASE_URL: Optional[str] = None # Placeholder
     #PULSE_AI_CORE_BASE_URL: Optional[str] = None # Placeholder
     #PULSE_SCHEDULER_BASE_URL: Optional[str] = None # Placeholder
-    ^#PULSE_EMAIL_BASE_URL: Optional[str] = None # Placeholder
+    #PULSE_EMAIL_BASE_URL: Optional[str] = None # Placeholder
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
