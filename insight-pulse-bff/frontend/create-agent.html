@@ -56,15 +56,15 @@
 
     <header class="absolute top-0 left-0 w-full p-6">
         <a href="index.html" class="flex items-center space-x-2">
-            <span class="text-2xl font-bold text-white">Insight Pulse</span>
+            <span class="text-2xl font-bold text-white">AIGORA</span>
         </a>
     </header>
 
     <main id="form-container" class="w-full max-w-2xl">
         <div class="glass-effect rounded-2xl p-8 shadow-2xl">
             <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-white">Create Your Agent</h1>
-                <p class="text-gray-400 mt-3 max-w-xl mx-auto">Insight Pulse creates a personalized AI agent to automate your information consumption. It scrapes posts from influencers you choose, analyzes them for key topics, and emails you a custom digest and a ready-to-publish summary post. Insight Pulse is just one of many powerful agents available on the <a href="https://aigora.cloud" target="_blank" class="text-blue-400 hover:underline font-semibold">AIGORA Marketplace</a>.</p>
+                <h1 class="text-3xl font-bold text-white">Create Your Insight Pulse Agent</h1>
+                <p class="text-gray-400 mt-3 max-w-xl mx-auto">This tool creates a personalized AI agent to automate your information consumption. It scrapes posts from influencers you choose, analyzes them for key topics, and emails you a custom digest and a ready-to-publish summary post. Insight Pulse is just one of many powerful agents available on the <a href="https://aigora.cloud" target="_blank" class="text-blue-400 hover:underline font-semibold">AIGORA Marketplace</a>.</p>
             </div>
             
             <div class="flex justify-center space-x-4 mb-8">
@@ -181,11 +181,13 @@
     <div id="success-message" class="hidden">
         <div class="glass-effect rounded-2xl p-8 shadow-2xl text-center">
             <h2 class="text-3xl font-bold text-white mb-4">✅ Success!</h2>
-            <p class="text-gray-300">Your Insight Pulse agent has been created.</p>
+            <p class="text-gray-300">Your AIGORA agent has been created.</p>
             <p class="text-gray-400 mt-2">You will be redirected to the login page shortly.</p>
         </div>
     </div>
     
+    <script src="js/utils.js"></script> <!-- Ensure utils.js is loaded first -->
+    <script src="js/api.js"></script>   <!-- Then api.js -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const formContainer = document.getElementById('form-container');
@@ -204,7 +206,7 @@
             let currentStep = 1;
             let urlCount = 0;
             const MAX_URLS = 20;
-            let planType = 'subscribe';
+            let planType = 'subscribe'; // Default plan type
 
             const showStep = (stepNumber) => {
                 Object.values(steps).forEach(step => step.classList.add('hidden'));
@@ -241,11 +243,14 @@
                 });
             };
 
-            addUrlInput();
-            showStep(1);
+            addUrlInput(); // Add initial URL input
+            showStep(1); // Show first step on load
 
+            // Navigation buttons
             document.getElementById('next-to-step-2').addEventListener('click', () => showStep(2));
             document.getElementById('next-to-step-3').addEventListener('click', () => {
+                // Basic validation for password match before proceeding to step 3 (if already on step 3)
+                // This check is primarily for the UI flow, full validation is on submit
                 if (currentStep === 3) {
                     const password = document.getElementById('password').value;
                     const confirmPassword = document.getElementById('confirm-password').value;
@@ -260,6 +265,7 @@
             document.getElementById('back-to-step-2').addEventListener('click', () => showStep(2));
             addUrlButton.addEventListener('click', addUrlInput);
 
+            // Plan selection buttons
             subscribeBtn.addEventListener('click', () => {
                 planType = 'subscribe';
                 apiKeysSection.classList.add('hidden');
@@ -274,12 +280,16 @@
                 subscribeBtn.classList.remove('border-blue-500', 'bg-blue-500/10');
             });
 
-            mainForm.addEventListener('submit', (e) => {
+            // Main form submission handler
+            mainForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
+                // Client-side validation
+                const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
                 const confirmPassword = document.getElementById('confirm-password').value;
                 const termsAgreed = document.getElementById('terms-agree').checked;
+                const agentName = document.querySelector('h1.text-3xl.font-bold.text-white').textContent.replace('Create Your ', '').replace(' Agent', '').trim(); // Dynamically get agent name
 
                 if (password !== confirmPassword) {
                     alert("Passwords do not match!");
@@ -294,38 +304,74 @@
                     return;
                 }
 
-                const formData = new FormData(mainForm);
-                const data = {
-                    plan: planType,
-                    apifyToken: formData.get('apify-token'),
-                    openaiToken: formData.get('openai-token'),
-                    email: formData.get('email'),
-                    password: formData.get('password'),
-                    digestTone: formData.get('digest-tone'),
-                    postTone: formData.get('post-tone'),
-                    linkedinUrls: []
-                };
+                // Collect LinkedIn URLs
+                const linkedinUrls = [];
                 urlInputsContainer.querySelectorAll('input[type="url"]').forEach(input => {
-                    if (input.value) data.linkedinUrls.push(input.value);
+                    if (input.value) linkedinUrls.push(input.value);
                 });
-                console.log('Form Data:', data);
+                if (linkedinUrls.length === 0) {
+                    alert("Please add at least one LinkedIn profile URL.");
+                    return;
+                }
 
+                // Collect other form data
+                const digestTone = document.getElementById('digest-tone').value;
+                const postTone = document.getElementById('post-tone').value;
+                const apifyToken = document.getElementById('apify-token').value;
+                const openaiToken = document.getElementById('openai-token').value;
+
+                // Show loading spinner
                 formContainer.classList.add('hidden');
-                loadingSpinner.classList.remove('hidden'); // Show loading spinner
+                loadingSpinner.classList.remove('hidden');
 
-                // Hide loading spinner and show success message after 3 seconds
-                setTimeout(() => {
-                    loadingSpinner.classList.add('hidden'); // Hide loading spinner
-                    successMessage.classList.remove('hidden'); // Show success message
-                    
-                    // After showing success message for 2 seconds, redirect to login page
+                try {
+                    // Step 1: Register User
+                    // Attempt to register. If email exists, API will return 400.
+                    // We then proceed to login, assuming the user is existing.
+                    let userRegistered = false;
+                    try {
+                        await registerUser(email, password);
+                        userRegistered = true;
+                    } catch (error) {
+                        if (error.message.includes("Email already registered")) {
+                            console.warn("User already registered, proceeding to login.");
+                            userRegistered = false; // Mark as not newly registered
+                        } else {
+                            throw error; // Re-throw other registration errors
+                        }
+                    }
+
+                    // Step 2: Log In User (whether new or existing)
+                    await loginUser(email, password); // This stores the token in localStorage
+
+                    // Step 3: Create Agent
+                    const agentData = {
+                        agent_name: agentName,
+                        email: email, // Pass email to BFF AgentCreate schema
+                        plan: planType,
+                        linkedin_urls: linkedinUrls,
+                        digest_tone: digestTone,
+                        post_tone: postTone,
+                        apify_token: planType === 'byok' ? apifyToken : null,
+                        openai_token: planType === 'byok' ? openaiToken : null
+                    };
+                    await createAgent(agentData);
+
+                    // If all successful, show success message and redirect
+                    loadingSpinner.classList.add('hidden');
+                    successMessage.classList.remove('hidden');
                     setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 2000); // 2 seconds for success message display
-                }, 3000); // 3 seconds for loading spinner display
+                        window.location.href = 'login.html'; // Redirect to login after success
+                    }, 2000);
+
+                } catch (error) {
+                    console.error('Agent creation failed:', error);
+                    alert(`Error: ${error.message}`); // Display user-friendly error
+                    loadingSpinner.classList.add('hidden');
+                    formContainer.classList.remove('hidden'); // Show form again on error
+                }
             });
         });
     </script>
-    <script src="js/utils.js"></script>
 </body>
 </html>
