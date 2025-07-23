@@ -8,6 +8,8 @@ from app.crud import agent as crud_agent
 from app.schemas.agent import AgentCreate, AgentResponse, AgentStatusUpdate
 from app.services.pulse_agent_manager_client import pulse_agent_manager_client
 
+from datetime import datetime, timedelta, UTC
+
 router = APIRouter()
 
 @router.post("/", response_model=AgentResponse, status_code=status.HTTP_201_CREATED, tags=["Agents"])
@@ -144,3 +146,58 @@ async def delete_ai_agent(
     success = crud_agent.delete_agent(db, agent_id, current_user.id)
     if not success:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to delete agent from BFF DB")
+    
+    @router.get("/{agent_id}/runs", response_model=List[AgentRun], tags=["Agents"])
+async def get_agent_runs(
+    agent_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db_session)
+):
+    """
+    Retrieve historical runs for a specific agent.
+    (Mocks data for now; in production, this would call a downstream service
+    like a 'pulse-runs-api' or query run logs.)
+    """
+    # First, ensure the agent belongs to the current user
+    agent = crud_agent.get_agent(db, agent_id, current_user.id)
+    if not agent:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found for this user.")
+
+    # --- MOCK DATA GENERATION ---
+    # This is placeholder data. In a real system, you would:
+    # 1. Call a dedicated backend service (e.g., 'pulse-runs-api')
+    #    Example: remote_runs_data = await pulse_runs_api_client.get_runs(agent_id=agent.pulse_agent_manager_id)
+    # 2. Transform that data into AgentRun schemas.
+
+    mock_runs = [
+        AgentRun(
+            run_id=f"run_{agent_id}_001",
+            agent_id=agent_id,
+            timestamp=datetime.now(UTC) - timedelta(days=1, hours=2), # Example timestamp
+            status="completed",
+            output_summary="Successfully processed 5 LinkedIn posts. Digest and summary email sent.",
+            generated_digest_url="https://example.com/digest/agent_id_001.pdf",
+            generated_post_url="https://linkedin.com/post/agent_id_001"
+        ),
+        AgentRun(
+            run_id=f"run_{agent_id}_002",
+            agent_id=agent_id,
+            timestamp=datetime.now(UTC) - timedelta(hours=8), # Example timestamp
+            status="completed",
+            output_summary="Processed 7 LinkedIn posts. Content generated and email sent.",
+            generated_digest_url="https://example.com/digest/agent_id_002.pdf",
+            generated_post_url="https://linkedin.com/post/agent_id_002"
+        ),
+        AgentRun(
+            run_id=f"run_{agent_id}_003",
+            agent_id=agent_id,
+            timestamp=datetime.now(UTC) - timedelta(hours=2), # Example timestamp
+            status="failed",
+            output_summary="Failed to connect to Apify API for scraping. Review API key.",
+            generated_digest_url=None,
+            generated_post_url=None
+        )
+    ]
+    # END MOCK DATA
+
+    return mock_runs
