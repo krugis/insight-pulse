@@ -9,7 +9,7 @@ def create_agent(
     user_id: int,
     agent_name: str,
     pulse_agent_manager_id: str,
-    config_data: Dict[str, Any],
+    config_data: Dict[str, Any], 
     apify_token: Optional[str] = None,
     openai_token: Optional[str] = None
 ) -> Agent:
