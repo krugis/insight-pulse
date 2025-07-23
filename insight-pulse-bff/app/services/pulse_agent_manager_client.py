@@ -1,61 +1,61 @@
-# In app/api/v1/endpoints/agents.py
-# ... (imports) ...
+import httpx
+from typing import Dict, Any, List, Optional
 
-@router.post("/", response_model=AgentResponse, status_code=status.HTTP_201_CREATED, tags=["Agents"])
-async def create_ai_agent(
-    agent_in: AgentCreate, # This is the incoming data from frontend/curl
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db_session)
-):
-    # Prepare API keys based on plan
-    apify_key = agent_in.apify_token if agent_in.plan == "byok" else None
-    openai_key = agent_in.openai_token if agent_in.plan == "byok" else None
+from app.core.config import settings
 
-    # Call the external pulse-agent-manager to create the agent
-    try:
-        remote_agent_response = await pulse_agent_manager_client.create_remote_agent(
-            user_id=current_user.id, # Still passed for context in BFF's client
-            agent_name=agent_in.agent_name, # Still passed for context in BFF's client
-            # NEW: Pass these parameters directly from agent_in
-            email=agent_in.email,
-            plan=agent_in.plan,
-            linkedin_urls=agent_in.linkedin_urls,
-            digest_tone=agent_in.digest_tone,
-            post_tone=agent_in.post_tone,
-            apify_token=apify_key,
-            openai_token=openai_key
-            # REMOVE THIS LINE: config_data={...}
-        )
-        # ... (rest of the try block and error handling) ...
-        pulse_agent_manager_id = remote_agent_response.get("agent_id") or remote_agent_response.get("id")
-        if not pulse_agent_manager_id:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="External agent manager did not return an agent ID."
-            )
+class PulseAgentManagerClient:
+    def __init__(self):
+        self.base_url = settings.PULSE_AGENT_MANAGER_BASE_URL
+        self.client = httpx.AsyncClient()
 
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Failed to create agent with external manager: {e}"
-        )
+    async def _request(self, method: str, path: str, **kwargs) -> Dict[str, Any]:
+        url = f"{self.base_url}{path}"
+        try:
+            response = await self.client.request(method, url, **kwargs)
+            response.raise_for_status()
+            return response.json()
+        except httpx.HTTPStatusError as e:
+            print(f"HTTP error occurred: {e.response.status_code} - {e.response.text}")
+            raise
+        except httpx.RequestError as e:
+            print(f"An error occurred while requesting {e.request.url!r}: {e}")
+            raise
 
-    # Store agent details in BFF's database
-    db_agent = crud_agent.create_agent(
-        db=db,
-        user_id=current_user.id,
-        agent_name=agent_in.agent_name,
-        pulse_agent_manager_id=pulse_agent_manager_id,
-        config_data={
-            "plan": agent_in.plan,
-            "linkedin_urls": agent_in.linkedin_urls,
-            "digest_tone": agent_in.digest_tone,
-            "post_tone": agent_in.post_tone,
-        },
-        apify_token=apify_key,
-        openai_token=openai_key
-    )
-    
-    return db_agent
+    async def create_remote_agent(
+        self,
+        user_id: int,
+        agent_name: str,
+        email: str,
+        plan: str,
+        linkedin_urls: List[str],
+        digest_tone: str,
+        post_tone: str,
+        apify_token: Optional[str] = None,
+        openai_token: Optional[str] = None
+    ) -> Dict[str, Any]:
+        
+        payload = {
+            "email": email,
+            "plan": plan,
+            "apifyToken": apify_token,
+            "openaiToken": openai_token,
+            "digestTone": digest_tone,
+            "postTone": post_tone,
+            "linkedinUrls": linkedin_urls,
+        }
+
+        payload = {k: v for k, v in payload.items() if v is not None}
+        
+        return await self._request("POST", "/agents/", json=payload)
+
+    async def get_remote_agent(self, agent_id: str) -> Dict[str, Any]:
+        return await self._request("GET", f"/agents/{agent_id}")
+
+    async def update_remote_agent_status(self, agent_id: str, new_status: str) -> Dict[str, Any]:
+        payload = {"status": new_status}
+        return await self._request("PATCH", f"/agents/{agent_id}/status", json=payload)
+
+    async def delete_remote_agent(self, agent_id: str):
+        await self._request("DELETE", f"/agents/{agent_id}")
+
+pulse_agent_manager_client = PulseAgentManagerClient()

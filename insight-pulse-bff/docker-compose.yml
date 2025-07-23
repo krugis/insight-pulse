@@ -59,4 +59,4 @@ volumes:
 networks:
   pulse_net: # Define a custom network for inter-service communication
     driver: bridge
-    #external: true
+    external: true

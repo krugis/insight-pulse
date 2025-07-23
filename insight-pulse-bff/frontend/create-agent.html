@@ -307,6 +307,7 @@
                 // Collect LinkedIn URLs
                 const linkedinUrls = [];
                 urlInputsContainer.querySelectorAll('input[type="url"]').forEach(input => {
+                    const url = input.value.trim();
                     if (input.value) linkedinUrls.push(input.value);
                 });
                 if (linkedinUrls.length === 0) {

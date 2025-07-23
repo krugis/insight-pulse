@@ -5,7 +5,7 @@ from typing import List, Optional
 from app.api.v1.deps import get_db_session, get_current_user
 from app.models.user import User
 from app.crud import agent as crud_agent
-from app.schemas.agent import AgentCreate, AgentResponse, AgentStatusUpdate
+from app.schemas.agent import AgentCreate, AgentResponse, AgentStatusUpdate, AgentRun
 from app.services.pulse_agent_manager_client import pulse_agent_manager_client
 
 from datetime import datetime, timedelta, UTC
@@ -147,17 +147,13 @@ async def delete_ai_agent(
     if not success:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to delete agent from BFF DB")
     
-    @router.get("/{agent_id}/runs", response_model=List[AgentRun], tags=["Agents"])
+@router.get("/{agent_id}/runs", response_model=List[AgentRun], tags=["Agents"])
 async def get_agent_runs(
     agent_id: int,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db_session)
 ):
-    """
-    Retrieve historical runs for a specific agent.
-    (Mocks data for now; in production, this would call a downstream service
-    like a 'pulse-runs-api' or query run logs.)
-    """
+
     # First, ensure the agent belongs to the current user
     agent = crud_agent.get_agent(db, agent_id, current_user.id)
     if not agent:
