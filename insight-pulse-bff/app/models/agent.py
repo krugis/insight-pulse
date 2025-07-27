@@ -18,7 +18,11 @@ class Agent(Base):
 
     # Configuration data for the agent, stored as JSON/dict
     config_data = Column(JSON, nullable=False) # Use JSON type
-
+    
+    # Soft delete flag
+    # This allows us to "delete" agents without removing them from the database
+    # Useful for audit trails and restoring deleted agents if needed
+    is_deleted = Column(Boolean, default=False, nullable=False)
     # Store API keys if using BYOK plan directly in the agent config for easy access
     apify_token = Column(String, nullable=True)
     openai_token = Column(String, nullable=True)

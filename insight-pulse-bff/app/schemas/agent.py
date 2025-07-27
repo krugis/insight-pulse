@@ -30,7 +30,7 @@ class AgentResponse(AgentBase): # Inherits agent_name, status
     config_data: Dict[str, Any] # This is now part of the response model, populated by BFF
     apify_token: Optional[str] = None # Include if BYOK
     openai_token: Optional[str] = None # Include if BYOK
-
+    is_deleted: bool = False # Soft delete flag
     class ConfigDict:
         from_attributes = True
 
@@ -60,3 +60,4 @@ class AgentUpdate(BaseModel):
     post_tone: Optional[str] = None
     apify_token: Optional[str] = None
     openai_token: Optional[str] = None
+    is_deleted: Optional[bool] = None

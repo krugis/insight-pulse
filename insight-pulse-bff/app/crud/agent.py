@@ -30,7 +30,11 @@ def get_agent(db: Session, agent_id: int, user_id: int) -> Optional[Agent]:
     return db.query(Agent).filter(Agent.id == agent_id, Agent.user_id == user_id).first()
 
 def get_user_agents(db: Session, user_id: int, skip: int = 0, limit: int = 100) -> List[Agent]:
-    return db.query(Agent).filter(Agent.user_id == user_id).offset(skip).limit(limit).all()
+    # Filter out soft-deleted agents for normal display
+    return db.query(Agent).filter(
+        Agent.user_id == user_id,
+        Agent.is_deleted == False # IMPORTANT: Filter out deleted agents here
+    ).offset(skip).limit(limit).all()
 
 def update_agent_status(db: Session, agent_id: int, user_id: int, new_status: str) -> Optional[Agent]:
     db_agent = get_agent(db, agent_id, user_id)
@@ -43,8 +47,10 @@ def update_agent_status(db: Session, agent_id: int, user_id: int, new_status: st
 def delete_agent(db: Session, agent_id: int, user_id: int) -> bool:
     db_agent = get_agent(db, agent_id, user_id)
     if db_agent:
-        db.delete(db_agent)
+        db_agent.is_deleted = True # Perform soft delete
+        db.add(db_agent)
         db.commit()
+        db.refresh(db_agent)
         return True
     return False
 

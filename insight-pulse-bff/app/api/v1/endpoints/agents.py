@@ -119,27 +119,29 @@ async def update_agent_status(
     db: Session = Depends(get_db_session)
 ):
     """
-    Update the status (e.g., pause, activate) of an AI agent.
-    Interacts with the external pulse-agent-manager service.
+    Update the status (e.g., pause, activate) of an AI agent in BFF's DB only.
+    Synchronization with pulse-agent-manager is a separate, future process.
     """
     db_agent = crud_agent.get_agent(db, agent_id, current_user.id)
     if not db_agent:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found")
 
-    try:
-        await pulse_agent_manager_client.update_remote_agent_status(
-            agent_id=db_agent.pulse_agent_manager_id,
-            new_status=status_update.status
-        )
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Failed to update status with external manager: {e}"
-        )
-    
-    updated_agent = crud_agent.update_agent_status(
+    # --- REMOVED DOWNSTREAM CALL TO pulse-agent-manager FOR STATUS UPDATE ---
+    # try:
+    #     await pulse_agent_manager_client.update_remote_agent_status(
+    #         agent_id=db_agent.pulse_agent_manager_id,
+    #         new_status=status_update.status
+    #     )
+    # except HTTPException:
+    #     raise
+    # except Exception as e:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+    #         detail=f"Failed to update status with external manager: {e}"
+    #     )
+    # --- END REMOVAL ---
+
+    updated_agent = crud_agent.update_agent_status( # This now only updates local DB
         db=db, 
         agent_id=agent_id, 
         user_id=current_user.id, 
@@ -154,28 +156,31 @@ async def delete_ai_agent(
     db: Session = Depends(get_db_session)
 ):
     """
-    Delete an AI agent.
-    Interacts with the external pulse-agent-manager service.
+    Soft-delete an AI agent in BFF's DB only.
+    Synchronization with external pulse-agent-manager is a separate, future process.
     """
     db_agent = crud_agent.get_agent(db, agent_id, current_user.id)
     if not db_agent:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found")
 
-    try:
-        await pulse_agent_manager_client.delete_remote_agent(
-            agent_id=db_agent.pulse_agent_manager_id
-        )
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Failed to delete agent with external manager: {e}"
-        )
+    # --- REMOVED DOWNSTREAM CALL TO pulse-agent-manager FOR DELETION ---
+    # try:
+    #     await pulse_agent_manager_client.delete_remote_agent(
+    #         agent_id=db_agent.pulse_agent_manager_id
+    #     )
+    # except HTTPException:
+    #     raise
+    # except Exception as e:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+    #         detail=f"Failed to delete agent with external manager: {e}"
+    #     )
+    # --- END REMOVAL ---
 
-    success = crud_agent.delete_agent(db, agent_id, current_user.id)
+    success = crud_agent.delete_agent(db, agent_id, current_user.id) # This now performs soft delete
     if not success:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to delete agent from BFF DB")
+    # Return 204 No Content for successful soft delete
 
 @router.get("/{agent_id}/runs", response_model=List[AgentRun], tags=["Agents"])
 async def get_agent_runs(
