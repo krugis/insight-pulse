@@ -56,34 +56,47 @@ def update_agent(
 ) -> Optional[Agent]:
     db_agent = get_agent(db, agent_id, user_id) # Retrieve the agent
     if db_agent:
+        print(f"DEBUG CRUD: Entering update_agent for agent_id: {agent_id}, user_id: {user_id}")
+        print(f"DEBUG CRUD: Initial db_agent.agent_name: {db_agent.agent_name}, config_data: {db_agent.config_data}")
+        print(f"DEBUG CRUD: Incoming agent_update_data: {agent_update_data}")
+
         # Ensure config_data is a dictionary (it's JSON type, so it should be a dict)
-        # This handles case where config_data might be None if Agent was created unusually
         if db_agent.config_data is None:
             db_agent.config_data = {}
 
-        # Iterate through the incoming update data
+        # Iterate through the provided update fields in agent_update_data
         for key, value in agent_update_data.items():
-            # Direct fields on the Agent model
+            # Fields that are directly on the Agent model
             if key == "agent_name":
                 db_agent.agent_name = value
-            elif key == "status":
+                print(f"DEBUG CRUD: Updated agent_name to: {db_agent.agent_name}")
+            elif key == "status": # This handles status updates if sent via this generic endpoint
                 db_agent.status = value
+                print(f"DEBUG CRUD: Updated status to: {db_agent.status}")
             elif key == "apify_token":
                 db_agent.apify_token = value
+                print(f"DEBUG CRUD: Updated apify_token (set if not None).")
             elif key == "openai_token":
                 db_agent.openai_token = value
-            # Fields that belong inside the config_data dictionary
-            elif key in ["linkedin_urls", "digest_tone", "post_tone", "plan"]: # 'plan' is in config_data too
+                print(f"DEBUG CRUD: Updated openai_token (set if not None).")
+            # Fields that belong inside the nested config_data dictionary
+            elif key in ["linkedin_urls", "digest_tone", "post_tone", "plan"]: # 'plan' is also part of config_data
                 db_agent.config_data[key] = value
-            # Add more elifs for other direct fields if your Agent model grows
+                print(f"DEBUG CRUD: Updated config_data['{key}'] to: {db_agent.config_data[key]}")
+            else:
+                # Log if there are unexpected keys in update_data, or if it's a field handled elsewhere
+                print(f"DEBUG CRUD: Skipping unhandled update key (might be intentional): {key}")
 
         # IMPORTANT FOR SQLAlchemy JSON type:
         # If you modify a JSON column's dictionary in place, SQLAlchemy might not
         # detect the change. Reassigning it forces SQLAlchemy to mark it as dirty.
         db_agent.config_data = dict(db_agent.config_data) 
+        print(f"DEBUG CRUD: config_data after in-memory update: {db_agent.config_data}")
 
-        db.add(db_agent) # Ensure the object is tracked by the session
-        db.commit()      # Persist changes to the database
+        db.add(db_agent)      # Ensure the object is tracked by the session
+        db.commit()           # Persist changes to the database
         db.refresh(db_agent) # Refresh the object to get its latest state from the DB
-
+        print(f"DEBUG CRUD: Agent ID {agent_id} successfully committed. Final db_agent.agent_name: {db_agent.agent_name}, config_data: {db_agent.config_data}")
+    else:
+        print(f"DEBUG CRUD: Agent {agent_id} not found for user {user_id} in update_agent.")
     return db_agent
