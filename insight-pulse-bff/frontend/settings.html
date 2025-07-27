@@ -108,13 +108,72 @@
     </main>
 
     <script>
-        document.querySelector('form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert("Settings saved successfully! (Demo action)");
-            // In a real app, send data to server and handle response
-            // window.location.href = 'dashboard.html'; // Redirect after real save
+        document.addEventListener('DOMContentLoaded', async () => {
+            const timezoneSelect = document.getElementById('timezone');
+            const languageSelect = document.getElementById('language');
+            const emailNotificationsCheckbox = document.getElementById('email-notifications');
+            const marketingEmailsCheckbox = document.getElementById('marketing-emails');
+            const settingsForm = document.getElementById('settings-form');
+
+            let currentUserSettings = {}; // To store fetched settings
+
+            async function loadUserSettings() {
+                try {
+                    const user = await getCurrentUser(); // From api.js
+                    // For demo, we'll use mock settings or infer from user object
+                    // In a real app, user object would have settings fields or a separate /settings API
+                    currentUserSettings = {
+                        timezone: "Europe/Istanbul", // Default or fetched
+                        language: "en", // Default or fetched
+                        emailNotifications: true, // Default or fetched
+                        marketingEmails: false // Default or fetched
+                    };
+
+                    // Apply fetched settings to form fields
+                    timezoneSelect.value = currentUserSettings.timezone;
+                    languageSelect.value = currentUserSettings.language;
+                    emailNotificationsCheckbox.checked = currentUserSettings.emailNotifications;
+                    marketingEmailsCheckbox.checked = currentUserSettings.marketingEmails;
+
+                } catch (error) {
+                    console.error('Error loading user settings:', error);
+                    alert(`Failed to load settings: ${error.message}. Redirecting to login.`);
+                    window.location.href = 'login.html';
+                }
+            }
+
+            settingsForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const updatedSettings = {
+                    timezone: timezoneSelect.value,
+                    language: languageSelect.value,
+                    emailNotifications: emailNotificationsCheckbox.checked,
+                    marketingEmails: marketingEmailsCheckbox.checked
+                };
+
+                try {
+                    // In a real app, you'd send this to a PATCH /users/me or PATCH /settings API
+                    // For now, we'll just simulate success and log
+                    console.log("Saving settings:", updatedSettings);
+                    // await updateCurrentUser({ settings: updatedSettings }); // Example if backend supports nested updates
+                    alert("Settings saved successfully! (Demo action)");
+                    window.location.href = 'dashboard.html'; // Redirect after save
+                } catch (error) {
+                    console.error('Error saving settings:', error);
+                    alert(`Failed to save settings: ${error.message}`);
+                }
+            });
+
+            // Initial load
+            if (getAccessToken()) {
+                loadUserSettings();
+            } else {
+                window.location.href = 'login.html'; // Redirect if not authenticated
+            }
         });
     </script>
     <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
 </body>
 </html>

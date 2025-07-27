@@ -34,11 +34,9 @@ class AgentResponse(AgentBase): # Inherits agent_name, status
     class ConfigDict:
         from_attributes = True
 
-# --- AgentDetailsResponse (remains same)
 class AgentDetailsResponse(AgentResponse):
     pass
 
-# --- AgentRun (remains same)
 class AgentRun(BaseModel):
     run_id: str = Field(..., description="Unique identifier for this specific agent run")
     agent_id: int = Field(..., description="Internal BFF Agent ID")
@@ -53,3 +51,12 @@ class AgentRun(BaseModel):
         json_encoders = {
             datetime: lambda dt: dt.isoformat()
         }
+
+class AgentUpdate(BaseModel):
+    agent_name: Optional[str] = Field(None, min_length=3, max_length=100)
+    status: Optional[str] = Field(None, pattern="^(active|paused|error)$")
+    linkedin_urls: Optional[List[str]] = Field(None, min_length=1, max_length=20)
+    digest_tone: Optional[str] = None
+    post_tone: Optional[str] = None
+    apify_token: Optional[str] = None
+    openai_token: Optional[str] = None

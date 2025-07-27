@@ -58,4 +58,17 @@ class PulseAgentManagerClient:
     async def delete_remote_agent(self, agent_id: str):
         await self._request("DELETE", f"/agents/{agent_id}")
 
+    async def update_remote_agent(self, agent_id: str, update_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Sends a PATCH request to the external pulse-agent-manager to update an agent.
+        Assumes pulse-agent-manager has a PATCH /agents/{id} endpoint.
+        """
+        # Ensure update_data keys match what pulse-agent-manager expects (e.g., camelCase aliases)
+        # This is a generic update, so we'll pass the dict as is.
+        # You might need to transform keys here if pulse-agent-manager has different aliases for PATCH.
+        print(f"MOCKING: Attempted to PATCH agent {agent_id} in pulse-agent-manager with data: {update_data}")
+        return {"status": "mock_success", "agent_id": agent_id, "updated_data": update_data}
+
+
+
 pulse_agent_manager_client = PulseAgentManagerClient()

@@ -115,20 +115,62 @@
             </form>
         </div>
     </main>
-
+    
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Simulate plan type - in a real app, this would come from backend
-            const userPlan = 'subscribe'; // or 'byok'
-            if (userPlan === 'byok') {
-                document.getElementById('api-keys-section').classList.remove('hidden');
+        document.addEventListener('DOMContentLoaded', async () => {
+            const currentEmailInput = document.getElementById('current-email');
+            const newEmailInput = document.getElementById('new-email');
+            const currentPasswordInput = document.getElementById('current-password');
+            const newPasswordInput = document.getElementById('new-password');
+            const confirmNewPasswordInput = document.getElementById('confirm-new-password');
+            const accountPlanDisplay = document.getElementById('account-plan-display');
+            const apiKeysSection = document.getElementById('api-keys-section');
+            const apifyTokenInput = document.getElementById('apify-token');
+            const openaiTokenInput = document.getElementById('openai-token');
+            const manageAccountForm = document.getElementById('manage-account-form');
+
+            let currentUserData = null; // Store current user data
+
+            async function loadUserData() {
+                try {
+                    currentUserData = await getCurrentUser(); // From api.js
+                    currentEmailInput.value = currentUserData.email;
+                    accountPlanDisplay.textContent = currentUserData.plan || 'N/A'; // Assuming plan comes from user data or agents
+
+                    // Show API keys section if user has BYOK agents or plan
+                    // For simplicity, we'll assume if any agent is BYOK, this section shows
+                    // In a real app, user object might have a plan type
+                    const agents = await getAllAgents();
+                    const hasByokAgent = agents.some(agent => agent.config_data.plan === 'byok');
+                    if (hasByokAgent) {
+                        apiKeysSection.classList.remove('hidden');
+                        // Tokens are usually not returned from /users/me for security.
+                        // Leave blank for user to re-enter if updating, or keep if not changing.
+                    }
+
+                } catch (error) {
+                    console.error('Error loading user data:', error);
+                    alert(`Failed to load account data: ${error.message}. Redirecting to login.`);
+                    window.location.href = 'login.html';
+                }
             }
 
-            document.querySelector('form').addEventListener('submit', function(e) {
+            manageAccountForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const currentPassword = document.getElementById('current-password').value;
-                const newPassword = document.getElementById('new-password').value;
-                const confirmNewPassword = document.getElementById('confirm-new-password').value;
+
+                const newEmail = newEmailInput.value.trim();
+                const currentPassword = currentPasswordInput.value;
+                const newPassword = newPasswordInput.value;
+                const confirmNewPassword = confirmNewPasswordInput.value;
+                const apifyToken = apifyTokenInput.value.trim();
+                const openaiToken = openaiTokenInput.value.trim();
+
+                if (!currentPassword) {
+                    alert("Please enter your current password to save changes.");
+                    return;
+                }
 
                 if (newPassword && newPassword !== confirmNewPassword) {
                     alert("New passwords do not match!");
@@ -138,14 +180,56 @@
                     alert("New password must be at least 6 characters long.");
                     return;
                 }
-                
-                // Simulate saving changes
-                alert("Account changes saved successfully! (Demo action)");
-                // In a real app, you'd send data to server and handle response
-                // window.location.href = 'dashboard.html'; // Redirect after real save
+
+                const updatePayload = {};
+                if (newEmail && newEmail !== currentUserData.email) {
+                    updatePayload.email = newEmail;
+                }
+                if (newPassword) {
+                    updatePayload.password = newPassword;
+                }
+                // For API tokens, only send if they are entered (user wants to update/set them)
+                if (apiKeysSection.classList.contains('hidden') === false) { // If BYOK section is visible
+                    if (apifyToken) {
+                        updatePayload.apify_token = apifyToken;
+                    } else if (currentUserData.apify_token_exists) { // Hypothetical field from backend
+                        updatePayload.apify_token = null; // User explicitly cleared it
+                    }
+                    if (openaiToken) {
+                        updatePayload.openai_token = openaiToken;
+                    } else if (currentUserData.openai_token_exists) { // Hypothetical field from backend
+                        updatePayload.openai_token = null; // User explicitly cleared it
+                    }
+                }
+
+                // If no changes were made (except current password), don't send empty update
+                if (Object.keys(updatePayload).length === 0) {
+                    alert("No changes to save.");
+                    return;
+                }
+
+                try {
+                    // For security, current password should ideally be sent with update payload
+                    // and validated on backend. For simplicity here, we assume backend handles it
+                    // based on the session token. If your backend PATCH /users/me requires current_password,
+                    // you'd add it to updatePayload.
+                    await updateCurrentUser(updatePayload); // From api.js
+                    alert("Account changes saved successfully!");
+                    // Optionally refresh page or redirect
+                    window.location.href = 'dashboard.html';
+                } catch (error) {
+                    console.error('Error saving account changes:', error);
+                    alert(`Failed to save changes: ${error.message}`);
+                }
             });
+
+            // Initial load
+            if (getAccessToken()) {
+                loadUserData();
+            } else {
+                window.location.href = 'login.html'; // Redirect if not authenticated
+            }
         });
     </script>
-    <script src="js/utils.js"></script>
 </body>
 </html>

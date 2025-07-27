@@ -47,3 +47,20 @@ def delete_agent(db: Session, agent_id: int, user_id: int) -> bool:
         db.commit()
         return True
     return False
+
+def update_agent(db: Session, agent_id: int, user_id: int, agent_update_data: Dict[str, Any]) -> Optional[Agent]:
+    db_agent = get_agent(db, agent_id, user_id)
+    if db_agent:
+        # Update fields from agent_update_data
+        for key, value in agent_update_data.items():
+            if hasattr(db_agent, key):
+                # Handle config_data separately if it's a nested update
+                if key == "config_data" and isinstance(value, dict):
+                    db_agent.config_data.update(value) # Merge updates into existing config_data
+                else:
+                    setattr(db_agent, key, value)
+
+        db.add(db_agent) # Ensure it's tracked by the session
+        db.commit()
+        db.refresh(db_agent)
+    return db_agent

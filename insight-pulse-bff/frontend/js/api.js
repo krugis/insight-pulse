@@ -139,3 +139,8 @@ async function deleteAgent(agentId) {
 async function getAgentRuns(agentId) {
     return apiRequest('GET', `/agents/${agentId}/runs`);
 }
+
+async function updateAgentDetails(agentId, agentData) {
+    // agentData should match the BFF's AgentUpdate schema (app/schemas/agent.py)
+    return apiRequest('PATCH', `/agents/${agentId}`, agentData);
+}

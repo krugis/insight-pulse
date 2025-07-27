@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, UTC # For mock data in get_agent_runs
 from app.api.v1.deps import get_db_session, get_current_user
 from app.models.user import User
 from app.crud import agent as crud_agent
-from app.schemas.agent import AgentCreate, AgentResponse, AgentStatusUpdate, AgentRun # Ensure AgentRun is imported
+from app.schemas.agent import AgentCreate, AgentResponse, AgentStatusUpdate, AgentRun, AgentUpdate 
 from app.services.pulse_agent_manager_client import pulse_agent_manager_client
 
 router = APIRouter()
@@ -224,5 +224,80 @@ async def get_agent_runs(
         )
     ]
     # END MOCK DATA
+    return mock_runs
+
+@router.patch("/{agent_id}", response_model=AgentResponse, tags=["Agents"])
+async def update_agent_details(
+    agent_id: int,
+    agent_update: AgentUpdate, # Incoming payload for update
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db_session)
+):
+    """
+    Update details for a specific AI agent (e.g., name, URLs, tones, API keys).
+    Interacts with the external pulse-agent-manager service.
+    """
+    db_agent = crud_agent.get_agent(db, agent_id, current_user.id)
+    if not db_agent:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found.")
+
+    # Prepare update data for the external manager
+    # Only send fields that are explicitly provided in the agent_update schema
+    update_data_for_remote = agent_update.model_dump(exclude_unset=True) # Pydantic v2 method
+
+    # Transform keys to camelCase for pulse-agent-manager where applicable
+    # This is crucial. You need to map BFF's snake_case to remote's camelCase aliases.
+    remote_update_payload = {}
+    for key, value in update_data_for_remote.items():
+        if key == "linkedin_urls": remote_update_payload["linkedinUrls"] = value
+        elif key == "digest_tone": remote_update_payload["digestTone"] = value
+        elif key == "post_tone": remote_update_payload["postTone"] = value
+        elif key == "apify_token": remote_update_payload["apifyToken"] = value
+        elif key == "openai_token": remote_update_payload["openaiToken"] = value
+        else: remote_update_payload[key] = value # For agent_name, status, etc.
+
+    # Handle API keys based on plan type (if plan type is also being updated or inferred)
+    # This logic might need refinement based on how pulse-agent-manager handles token updates
+    if db_agent.config_data.get("plan") == "byok":
+        if "apifyToken" in remote_update_payload and remote_update_payload["apifyToken"] is None:
+            # If BYOK and token is explicitly set to null, it means disconnect
+            pass
+        if "openaiToken" in remote_update_payload and remote_update_payload["openaiToken"] is None:
+            pass
+    elif db_agent.config_data.get("plan") == "subscribe":
+        # If plan changes to BYOK, ensure tokens are provided
+        if "plan" in remote_update_payload and remote_update_payload["plan"] == "byok":
+            if not remote_update_payload.get("apifyToken") or not remote_update_payload.get("openaiToken"):
+                raise HTTPException(status_code=400, detail="API tokens are required for BYOK plan.")
+
+
+    try:
+        await pulse_agent_manager_client.update_remote_agent(
+            agent_id=db_agent.pulse_agent_manager_id,
+            update_data=remote_update_payload
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Failed to update agent with external manager: {e}"
+        )
+
+    # Update agent details in BFF's database
+    # Reconstruct config_data for BFF's DB if relevant fields are updated
+    if "linkedin_urls" in update_data_for_remote: db_agent.config_data["linkedin_urls"] = update_data_for_remote["linkedin_urls"]
+    if "digest_tone" in update_data_for_remote: db_agent.config_data["digest_tone"] = update_data_for_remote["digest_tone"]
+    if "post_tone" in update_data_for_remote: db_agent.config_data["post_tone"] = update_data_for_remote["post_tone"]
+    if "plan" in update_data_for_remote: db_agent.config_data["plan"] = update_data_for_remote["plan"]
+
+    # Update direct fields on db_agent
+    updated_agent = crud_agent.update_agent(
+        db=db,
+        agent_id=agent_id,
+        user_id=current_user.id,
+        agent_update_data=update_data_for_remote # Pass the Pydantic dict directly
+    )
+    return updated_agent
     
     return mock_runs

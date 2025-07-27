@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit AI Agent - AIGORA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* bg-gray-900 */
+        }
+        .glass-effect {
+            background: rgba(31, 41, 55, 0.5); /* bg-gray-800 with opacity */
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .form-input {
+            background-color: #1f2937; /* bg-gray-800 */
+            border-color: #4b5563; /* border-gray-600 */
+            color: #d1d5db; /* text-gray-300 */
+        }
+        .form-input:focus {
+            border-color: #3b82f6; /* border-blue-500 */
+            ring-color: #3b82f6;
+            --tw-ring-opacity: 0.5;
+        }
+        .btn-primary {
+            background-color: #2563eb; /* bg-blue-600 */
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #1d4ed8; /* bg-blue-700 */
+        }
+        .btn-secondary {
+            background-color: #374151; /* bg-gray-700 */
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #4b5563; /* bg-gray-600 */
+        }
+    </style>
+</head>
+<body class="text-gray-200 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <header class="absolute top-0 left-0 w-full p-6">
+        <a href="dashboard.html" class="flex items-center space-x-2">
+            <span class="text-2xl font-bold text-white">AIGORA</span>
+        </a>
+    </header>
+
+    <main class="w-full max-w-2xl">
+        <div class="glass-effect rounded-2xl p-8 shadow-2xl">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-white">Edit Agent: <span id="agent-name-display"></span></h1>
+                <p class="text-gray-400 mt-3 max-w-xl mx-auto">Modify your agent's settings.</p>
+            </div>
+
+            <form id="edit-agent-form">
+                <div class="space-y-6">
+                    <div>
+                        <label for="agent-name" class="block text-sm font-medium text-gray-300">Agent Name</label>
+                        <input type="text" id="agent-name" name="agent-name" required class="form-input mt-1 block w-full rounded-md shadow-sm">
+                    </div>
+
+                    <div>
+                        <h2 class="text-xl font-semibold mb-4 text-white">Influencer Profiles</h2>
+                        <p class="text-gray-400 text-sm mb-4">Your agent will scrape the latest posts from these influencers. This content is the foundation for your daily digest and summary posts.</p>
+                        <div id="url-inputs-container" class="space-y-3 max-h-64 overflow-y-auto pr-2">
+                            <!-- URL inputs will be dynamically added here -->
+                        </div>
+                        <button type="button" id="add-url-button" class="mt-4 flex items-center space-x-2 text-blue-400 hover:text-blue-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" /></svg>
+                            <span>Add another profile</span>
+                        </button>
+                    </div>
+
+                    <div>
+                        <label for="digest-tone" class="block text-sm font-medium text-gray-300">Tone of the Daily Digest Email</label>
+                        <select id="digest-tone" name="digest-tone" class="form-input mt-1 block w-full rounded-md shadow-sm">
+                            <option>Professional & Insightful</option>
+                            <option>Casual & Quick</option>
+                            <option>Formal & Detailed</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="post-tone" class="block text-sm font-medium text-gray-300">Tone of the Generated LinkedIn Post</label>
+                        <select id="post-tone" name="post-tone" class="form-input mt-1 block w-full rounded-md shadow-sm">
+                            <option>Formal & Engaging</option>
+                            <option>Bold & Contrarian</option>
+                            <option>Inspirational & Visionary</option>
+                        </select>
+                    </div>
+
+                    <div id="api-keys-section" class="space-y-4 hidden">
+                        <h3 class="text-lg font-semibold text-white mt-4">API Keys (for BYOK plan)</h3>
+                        <div>
+                            <label for="apify-token" class="block text-sm font-medium text-gray-300">Apify API Token</label>
+                            <input type="password" id="apify-token" name="apify-token" class="form-input mt-1 block w-full rounded-md shadow-sm" placeholder="apify_api_...">
+                            <p class="text-gray-500 text-xs mt-1">Leave blank to keep current, or enter new token.</p>
+                        </div>
+                        <div>
+                            <label for="openai-token" class="block text-sm font-medium text-gray-300">OpenAI API Token</label>
+                            <input type="password" id="openai-token" name="openai-token" class="form-input mt-1 block w-full rounded-md shadow-sm" placeholder="sk-...">
+                            <p class="text-gray-500 text-xs mt-1">Leave blank to keep current, or enter new token.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-between">
+                    <a href="dashboard.html" class="btn-secondary font-semibold py-2 px-6 rounded-lg">Back to Dashboard</a>
+                    <button type="submit" class="btn-primary font-semibold py-2 px-6 rounded-lg">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const agentId = urlParams.get('id');
+
+            const agentNameDisplay = document.getElementById('agent-name-display');
+            const editAgentForm = document.getElementById('edit-agent-form');
+            const agentNameInput = document.getElementById('agent-name');
+            const urlInputsContainer = document.getElementById('url-inputs-container');
+            const addUrlButton = document.getElementById('add-url-button');
+            const digestToneSelect = document.getElementById('digest-tone');
+            const postToneSelect = document.getElementById('post-tone');
+            const apiKeysSection = document.getElementById('api-keys-section');
+            const apifyTokenInput = document.getElementById('apify-token');
+            const openaiTokenInput = document.getElementById('openai-token');
+
+            let currentAgentData = null; // To store fetched agent data
+            let urlCount = 0;
+            const MAX_URLS = 20;
+
+            // Function to add a URL input field
+            const addUrlInput = (urlValue = '') => {
+                if (urlCount >= MAX_URLS) return;
+                urlCount++;
+                const div = document.createElement('div');
+                div.className = 'flex items-center space-x-2';
+                const input = document.createElement('input');
+                input.type = 'url';
+                input.name = `linkedin-url-${urlCount}`;
+                input.className = 'form-input block w-full rounded-md shadow-sm';
+                input.placeholder = `https://linkedin.com/in/profile-${urlCount}`;
+                input.value = urlValue; // Pre-fill if value provided
+                input.required = true; // Make URLs required
+
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'text-gray-500 hover:text-red-400';
+                removeBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" clip-rule="evenodd" /></svg>`;
+
+                div.appendChild(input);
+                div.appendChild(removeBtn);
+                urlInputsContainer.appendChild(div);
+
+                removeBtn.addEventListener('click', () => {
+                    urlInputsContainer.removeChild(div);
+                    urlCount--;
+                    // No need to update counter text for edit page, but keep logic
+                    addUrlButton.style.display = urlCount >= MAX_URLS ? 'none' : 'flex';
+                });
+            };
+
+            addUrlButton.addEventListener('click', () => addUrlInput());
+
+            // Function to pre-fill form with agent data
+            async function loadAgentData() {
+                if (!agentId) {
+                    alert('No agent ID provided. Redirecting to dashboard.');
+                    window.location.href = 'dashboard.html';
+                    return;
+                }
+
+                try {
+                    currentAgentData = await getAgentDetails(agentId); // From api.js
+                    if (!currentAgentData) {
+                        alert('Agent not found or access denied. Redirecting to dashboard.');
+                        window.location.href = 'dashboard.html';
+                        return;
+                    }
+
+                    agentNameDisplay.textContent = currentAgentData.agent_name;
+                    agentNameInput.value = currentAgentData.agent_name;
+
+                    // Populate LinkedIn URLs
+                    urlInputsContainer.innerHTML = ''; // Clear existing dummy inputs
+                    urlCount = 0; // Reset count
+                    if (currentAgentData.config_data.linkedin_urls && currentAgentData.config_data.linkedin_urls.length > 0) {
+                        currentAgentData.config_data.linkedin_urls.forEach(url => addUrlInput(url));
+                    } else {
+                        addUrlInput(); // Add at least one empty input if none exist
+                    }
+
+                    // Select correct tone options
+                    digestToneSelect.value = currentAgentData.config_data.digest_tone;
+                    postToneSelect.value = currentAgentData.config_data.post_tone;
+
+                    // Show API keys section if BYOK plan
+                    if (currentAgentData.config_data.plan === 'byok') {
+                        apiKeysSection.classList.remove('hidden');
+                        // Pre-fill tokens if they are stored (though usually not returned for security)
+                        // For this demo, we'll assume they are not returned and leave blank
+                        // apifyTokenInput.value = currentAgentData.apify_token || '';
+                        // openaiTokenInput.value = currentAgentData.openai_token || '';
+                    }
+
+                } catch (error) {
+                    console.error('Error loading agent data:', error);
+                    alert(`Failed to load agent data: ${error.message}. Redirecting to dashboard.`);
+                    window.location.href = 'dashboard.html';
+                }
+            }
+
+            // Handle form submission for updates
+            editAgentForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const updatedLinkedinUrls = [];
+                urlInputsContainer.querySelectorAll('input[type="url"]').forEach(input => {
+                    const url = input.value.trim();
+                    if (url) updatedLinkedinUrls.push(url);
+                });
+
+                if (updatedLinkedinUrls.length === 0) {
+                    alert("Please add at least one LinkedIn profile URL.");
+                    return;
+                }
+
+                const updatePayload = {
+                    agent_name: agentNameInput.value.trim(),
+                    linkedin_urls: updatedLinkedinUrls,
+                    digest_tone: digestToneSelect.value,
+                    post_tone: postToneSelect.value
+                };
+
+                // Only include API tokens if they were explicitly entered
+                if (apiKeysSection.classList.contains('hidden') === false) { // If BYOK section is visible
+                    if (apifyTokenInput.value.trim()) {
+                        updatePayload.apify_token = apifyTokenInput.value.trim();
+                    } else {
+                        // If user clears a BYOK token, send null to disconnect/clear it
+                        updatePayload.apify_token = null;
+                    }
+                    if (openaiTokenInput.value.trim()) {
+                        updatePayload.openai_token = openaiTokenInput.value.trim();
+                    } else {
+                        updatePayload.openai_token = null;
+                    }
+                }
+
+                try {
+                    // Call the update API
+                    await updateAgentDetails(agentId, updatePayload); // From api.js
+                    alert('Agent updated successfully!');
+                    window.location.href = 'dashboard.html'; // Redirect back to dashboard
+                } catch (error) {
+                    console.error('Error updating agent:', error);
+                    alert(`Failed to update agent: ${error.message}`);
+                }
+            });
+
+            // Initial load
+            if (getAccessToken()) {
+                loadAgentData();
+            } else {
+                window.location.href = 'login.html'; // Redirect if not authenticated
+            }
+        });
+    </script>
+</body>
+</html>
