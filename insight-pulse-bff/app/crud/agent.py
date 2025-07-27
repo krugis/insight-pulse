@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any
-
+from sqlalchemy.orm.attributes import flag_modified
 from app.models.agent import Agent
 from app.schemas.agent import AgentCreate, AgentStatusUpdate
 
@@ -50,27 +50,24 @@ def delete_agent(db: Session, agent_id: int, user_id: int) -> bool:
 
 def update_agent(
     db: Session,
-    agent_id: int, # ID of the agent to update
-    user_id: int,  # User ID for ownership check
-    agent_update_data: Dict[str, Any] # Dictionary of fields to update (from agent_update.model_dump())
+    agent_id: int,
+    user_id: int,
+    agent_update_data: Dict[str, Any]
 ) -> Optional[Agent]:
-    db_agent = get_agent(db, agent_id, user_id) # Retrieve the agent
+    db_agent = get_agent(db, agent_id, user_id)
     if db_agent:
         print(f"DEBUG CRUD: Entering update_agent for agent_id: {agent_id}, user_id: {user_id}")
         print(f"DEBUG CRUD: Initial db_agent.agent_name: {db_agent.agent_name}, config_data: {db_agent.config_data}")
         print(f"DEBUG CRUD: Incoming agent_update_data: {agent_update_data}")
 
-        # Ensure config_data is a dictionary (it's JSON type, so it should be a dict)
         if db_agent.config_data is None:
             db_agent.config_data = {}
 
-        # Iterate through the provided update fields in agent_update_data
         for key, value in agent_update_data.items():
-            # Fields that are directly on the Agent model
             if key == "agent_name":
                 db_agent.agent_name = value
                 print(f"DEBUG CRUD: Updated agent_name to: {db_agent.agent_name}")
-            elif key == "status": # This handles status updates if sent via this generic endpoint
+            elif key == "status":
                 db_agent.status = value
                 print(f"DEBUG CRUD: Updated status to: {db_agent.status}")
             elif key == "apify_token":
@@ -79,21 +76,21 @@ def update_agent(
             elif key == "openai_token":
                 db_agent.openai_token = value
                 print(f"DEBUG CRUD: Updated openai_token (set if not None).")
-            # Fields that belong inside the nested config_data dictionary
-            elif key in ["linkedin_urls", "digest_tone", "post_tone", "plan"]: # 'plan' is also part of config_data
+            elif key in ["linkedin_urls", "digest_tone", "post_tone", "plan"]:
                 db_agent.config_data[key] = value
                 print(f"DEBUG CRUD: Updated config_data['{key}'] to: {db_agent.config_data[key]}")
             else:
-                # Log if there are unexpected keys in update_data, or if it's a field handled elsewhere
                 print(f"DEBUG CRUD: Skipping unhandled update key (might be intentional): {key}")
 
-        # IMPORTANT FOR SQLAlchemy JSON type:
-        # If you modify a JSON column's dictionary in place, SQLAlchemy might not
-        # detect the change. Reassigning it forces SQLAlchemy to mark it as dirty.
+        # Force JSON dirty flag - THIS IS THE CRITICAL ADDITION
+        # Reassigning to a dict ensures it's a new Python dict object
         db_agent.config_data = dict(db_agent.config_data) 
-        print(f"DEBUG CRUD: config_data after in-memory update: {db_agent.config_data}")
+        # Explicitly tell SQLAlchemy that the 'config_data' attribute has been modified
+        flag_modified(db_agent, "config_data") # <--- NEW LINE HERE
 
-        db.add(db_agent)      # Ensure the object is tracked by the session
+        print(f"DEBUG CRUD: config_data after applying updates (in-memory, before commit): {db_agent.config_data}")
+
+        db.add(db_agent)      # Ensure the object is tracked by the session (if detached)
         db.commit()           # Persist changes to the database
         db.refresh(db_agent) # Refresh the object to get its latest state from the DB
         print(f"DEBUG CRUD: Agent ID {agent_id} successfully committed. Final db_agent.agent_name: {db_agent.agent_name}, config_data: {db_agent.config_data}")

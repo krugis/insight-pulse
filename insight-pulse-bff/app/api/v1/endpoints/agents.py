@@ -184,47 +184,52 @@ async def get_agent_runs(
     db: Session = Depends(get_db_session)
 ):
     """
-    Retrieve historical runs for a specific agent.
-    (Mocks data for now; in production, this would call a downstream service
-    like a 'pulse-runs-api' or query run logs.)
+    Retrieve historical runs for a specific agent from Pulse Content API.
     """
-    # First, ensure the agent belongs to the current user
     agent = crud_agent.get_agent(db, agent_id, current_user.id)
     if not agent:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found for this user.")
 
-    # --- MOCK DATA GENERATION ---
-    mock_runs = [
-        AgentRun(
-            run_id=f"run_{agent_id}_001",
-            agent_id=agent_id,
-            timestamp=datetime.now(UTC) - timedelta(days=1, hours=2),
-            status="completed",
-            output_summary="Successfully processed 5 LinkedIn posts. Digest and summary email sent.",
-            generated_digest_url="https://example.com/digest/agent_id_001.pdf",
-            generated_post_url="https://linkedin.com/post/agent_id_001"
-        ),
-        AgentRun(
-            run_id=f"run_{agent_id}_002",
-            agent_id=agent_id,
-            timestamp=datetime.now(UTC) - timedelta(hours=8),
-            status="completed",
-            output_summary="Processed 7 LinkedIn posts. Content generated and email sent.",
-            generated_digest_url="https://example.com/digest/agent_id_002.pdf",
-            generated_post_url="https://linkedin.com/post/agent_id_002"
-        ),
-        AgentRun(
-            run_id=f"run_{agent_id}_003",
-            agent_id=agent_id,
-            timestamp=datetime.now(UTC) - timedelta(hours=2),
-            status="failed",
-            output_summary="Failed to connect to Apify API for scraping. Review API key.",
-            generated_digest_url=None,
-            generated_post_url=None
+    # Call Pulse Content API to get actual run history
+    try:
+        # We use agent.pulse_agent_manager_id (the ID in the external manager) to query for runs
+        remote_runs_data = await pulse_content_api_client.get_agent_run_history(
+            pulse_agent_manager_id=agent.pulse_agent_manager_id
         )
-    ]
-    # END MOCK DATA
-    return mock_runs
+
+        # Ensure remote_runs_data is a list
+        if not isinstance(remote_runs_data, list):
+            print(f"Warning: Pulse Content API returned non-list data for runs for agent {agent.id}: {remote_runs_data}")
+            remote_runs_data = [] # Default to empty list if not a list
+
+        agent_runs = []
+        for run_data in remote_runs_data:
+            try:
+                # Convert timestamp string from remote API to datetime object for Pydantic validation
+                # Assuming remote API returns ISO format string (e.g., "2025-07-26T10:30:00.000000Z")
+                if 'timestamp' in run_data and isinstance(run_data['timestamp'], str):
+                    run_data['timestamp'] = datetime.fromisoformat(run_data['timestamp'].replace('Z', '+00:00')) # Handle Z for UTC
+
+                # Ensure agent_id for the run object matches BFF's internal agent_id
+                run_data['agent_id'] = agent.id
+
+                agent_runs.append(AgentRun(**run_data))
+            except Exception as e:
+                print(f"Error parsing or transforming run data from Pulse Content API for agent {agent.id}: {e} - Data: {run_data}")
+                # Skip malformed run entry, but log the error
+                continue
+
+        return agent_runs
+
+    except HTTPException:
+        raise # Re-raise FastAPI HTTPExceptions
+    except Exception as e:
+        # If the Pulse Content API is unavailable or returns an unexpected error
+        print(f"ERROR: Failed to fetch agent runs from Pulse Content API for agent {agent.id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Failed to fetch agent runs from Pulse Content API: {e}"
+        )
 
 @router.patch("/{agent_id}", response_model=AgentResponse, tags=["Agents"])
 async def update_agent_details(
@@ -290,4 +295,3 @@ async def update_agent_details(
     )
     return updated_agent
     
-    return mock_runs

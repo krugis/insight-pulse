@@ -49,25 +49,37 @@ class PulseAgentManagerClient:
         return await self._request("POST", "/agents/", json=payload)
 
     async def get_remote_agent(self, agent_id: str) -> Dict[str, Any]:
+        """
+        Fetches details of an agent from the external pulse-agent-manager.
+        Assumes GET /agents/{id} endpoint exists on pulse-agent-manager.
+        """
+        # --- ACTUAL CALL ---
         return await self._request("GET", f"/agents/{agent_id}")
 
     async def update_remote_agent_status(self, agent_id: str, new_status: str) -> Dict[str, Any]:
+        """
+        Updates the status of an agent in the external pulse-agent-manager.
+        Assumes PATCH /agents/{id}/status endpoint exists on pulse-agent-manager.
+        """
         payload = {"status": new_status}
+        # --- ACTUAL CALL ---
         return await self._request("PATCH", f"/agents/{agent_id}/status", json=payload)
-
-    async def delete_remote_agent(self, agent_id: str):
-        await self._request("DELETE", f"/agents/{agent_id}")
 
     async def update_remote_agent(self, agent_id: str, update_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Sends a PATCH request to the external pulse-agent-manager to update an agent.
-        Assumes pulse-agent-manager has a PATCH /agents/{id} endpoint.
+        Updates general details of an agent in the external pulse-agent-manager.
+        Assumes PATCH /agents/{id} endpoint exists on pulse-agent-manager.
         """
-        # Ensure update_data keys match what pulse-agent-manager expects (e.g., camelCase aliases)
-        # This is a generic update, so we'll pass the dict as is.
-        # You might need to transform keys here if pulse-agent-manager has different aliases for PATCH.
-        print(f"MOCKING: Attempted to PATCH agent {agent_id} in pulse-agent-manager with data: {update_data}")
-        return {"status": "mock_success", "agent_id": agent_id, "updated_data": update_data}
+        # --- ACTUAL CALL ---
+        return await self._request("PATCH", f"/agents/{agent_id}", json=update_data)
+
+    async def delete_remote_agent(self, agent_id: str):
+        """
+        Deletes an agent from the external pulse-agent-manager.
+        Assumes DELETE /agents/{id} endpoint exists on pulse-agent-manager.
+        """
+        # --- ACTUAL CALL ---
+        return await self._request("DELETE", f"/agents/{agent_id}")
 
 
 
