@@ -1,1 +1,1 @@
-const API_BASE_URL = "https://ab37147adf56.ngrok-free.app/api/v1"
+const API_BASE_URL = "https://718bebaf264f.ngrok-free.app/api/v1"
