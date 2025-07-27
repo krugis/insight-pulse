@@ -48,19 +48,42 @@ def delete_agent(db: Session, agent_id: int, user_id: int) -> bool:
         return True
     return False
 
-def update_agent(db: Session, agent_id: int, user_id: int, agent_update_data: Dict[str, Any]) -> Optional[Agent]:
-    db_agent = get_agent(db, agent_id, user_id)
+def update_agent(
+    db: Session,
+    agent_id: int, # ID of the agent to update
+    user_id: int,  # User ID for ownership check
+    agent_update_data: Dict[str, Any] # Dictionary of fields to update (from agent_update.model_dump())
+) -> Optional[Agent]:
+    db_agent = get_agent(db, agent_id, user_id) # Retrieve the agent
     if db_agent:
-        # Update fields from agent_update_data
-        for key, value in agent_update_data.items():
-            if hasattr(db_agent, key):
-                # Handle config_data separately if it's a nested update
-                if key == "config_data" and isinstance(value, dict):
-                    db_agent.config_data.update(value) # Merge updates into existing config_data
-                else:
-                    setattr(db_agent, key, value)
+        # Ensure config_data is a dictionary (it's JSON type, so it should be a dict)
+        # This handles case where config_data might be None if Agent was created unusually
+        if db_agent.config_data is None:
+            db_agent.config_data = {}
 
-        db.add(db_agent) # Ensure it's tracked by the session
-        db.commit()
-        db.refresh(db_agent)
+        # Iterate through the incoming update data
+        for key, value in agent_update_data.items():
+            # Direct fields on the Agent model
+            if key == "agent_name":
+                db_agent.agent_name = value
+            elif key == "status":
+                db_agent.status = value
+            elif key == "apify_token":
+                db_agent.apify_token = value
+            elif key == "openai_token":
+                db_agent.openai_token = value
+            # Fields that belong inside the config_data dictionary
+            elif key in ["linkedin_urls", "digest_tone", "post_tone", "plan"]: # 'plan' is in config_data too
+                db_agent.config_data[key] = value
+            # Add more elifs for other direct fields if your Agent model grows
+
+        # IMPORTANT FOR SQLAlchemy JSON type:
+        # If you modify a JSON column's dictionary in place, SQLAlchemy might not
+        # detect the change. Reassigning it forces SQLAlchemy to mark it as dirty.
+        db_agent.config_data = dict(db_agent.config_data) 
+
+        db.add(db_agent) # Ensure the object is tracked by the session
+        db.commit()      # Persist changes to the database
+        db.refresh(db_agent) # Refresh the object to get its latest state from the DB
+
     return db_agent
