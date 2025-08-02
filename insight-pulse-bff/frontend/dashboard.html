@@ -110,7 +110,7 @@
         <div class="glass-effect rounded-2xl p-6 mb-8 shadow-lg">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-semibold text-white">Your AI Agents</h2>
-                <a href="create-agent.html" class="btn-primary font-semibold py-2 px-4 rounded-lg">New Agent</a>
+                <a href="create-agent.html" id="new-agent-btn" class="btn-primary font-semibold py-2 px-4 rounded-lg">New Agent</a>
             </div>
             <div class="space-y-4" id="agent-list-container">
                 <p class="text-gray-400 text-center" id="no-agents-message">No agents found. Create a new one!</p>
@@ -200,7 +200,7 @@
             const agentRunsTableBody = document.getElementById('agent-runs-table-body');
             const noRunsMessage = document.getElementById('no-runs-message');
             const logoutBtn = document.getElementById('logout-btn');
-
+            const newAgentBtn = document.getElementById('new-agent-btn'); 
             // Modal elements
             const agentDetailsModal = document.getElementById('agent-details-modal');
             const modalAgentName = document.getElementById('modal-agent-name');
@@ -254,10 +254,12 @@
                     if (agents.length === 0) {
                         noAgentsMessage.classList.remove('hidden');
                         noRunsMessage.classList.remove('hidden');
+                        newAgentBtn.classList.remove('hidden'); 
                     } else {
                         noAgentsMessage.classList.add('hidden');
                         noRunsMessage.classList.add('hidden');
                         agentRunsTableBody.innerHTML = ''; // Clear existing run entries
+                        newAgentBtn.classList.add('hidden'); // Hide "New Agent" button if agents exist
 
                         let firstAgentPlanType = "N/A";
                         let hasApifyToken = false;
