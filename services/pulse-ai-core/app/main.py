@@ -31,7 +31,7 @@ def create_and_save_digest(db: Session):
         else:
             print(f"Digest for {today} already exists. Skipping save.")
 
-@app.post("/generate-newspaper", response_model=schemas.DigestResponse)
+@app.post("/generate-newspaper", response_model=schemas.JobSubmissionResponse)
 async def generate_newspaper_endpoint(background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """
     Triggers the newspaper generation and saves the result to the database.

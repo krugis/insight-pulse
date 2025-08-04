@@ -7,3 +7,7 @@ class DigestResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class JobSubmissionResponse(BaseModel):
+    status: str
+    message: str
