@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
+    DATABASE_URL: str
     OPENSEARCH_HOST: str = "opensearch"
     OPENAI_API_KEY: str
 

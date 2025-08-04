@@ -1,20 +1,44 @@
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, BackgroundTasks, Depends
+from sqlalchemy.orm import Session
+from datetime import date
 from . import newspaper_generator, topic_post_generator, analyzer
+from .db import models, database, schemas
+
+# Create DB tables
+models.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI(title="Pulse AI Core Service")
 
-@app.post("/generate-for-agent/{agent_id}")
-async def generate_content_for_agent(agent_id: int, background_tasks: BackgroundTasks):
-    """
-    Triggers the full analysis and content generation pipeline for a single agent.
-    This is the endpoint the scheduler will call for each user.
-    """
-    # In a real app, you would fetch the agent's config from pulse-agent-manager
-    # For now, we'll just log the ID
-    print(f"--- Triggered AI Core for Agent ID: {agent_id} ---")
+def get_db():
+    db = database.SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
-    # Run the generation scripts in the background so the API can respond immediately
-    background_tasks.add_task(newspaper_generator.generate_newspaper_content)
-    background_tasks.add_task(topic_post_generator.generate_topic_post)
-    
-    return {"status": "success", "message": f"AI Core tasks scheduled for agent {agent_id}"}
+def create_and_save_digest(db: Session):
+    """The background task that runs the full AI pipeline."""
+    content = newspaper_generator.generate_newspaper_content()
+    if content:
+        today = date.today()
+        # Check if a digest for today already exists
+        db_digest = db.query(models.DailyDigest).filter(models.DailyDigest.publication_date == today).first()
+        if not db_digest:
+            db_digest = models.DailyDigest(publication_date=today, content_json=content)
+            db.add(db_digest)
+            db.commit()
+            print(f"✅ Digest for {today} saved to database.")
+        else:
+            print(f"Digest for {today} already exists. Skipping save.")
+
+@app.post("/generate-newspaper", response_model=schemas.DigestResponse)
+async def generate_newspaper_endpoint(background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    """
+    Triggers the newspaper generation and saves the result to the database.
+    """
+    background_tasks.add_task(create_and_save_digest, db)
+    return {"status": "success", "message": "Newspaper generation job started in the background."}
+
+@app.get("/docs")
+def read_docs():
+    return {"message": "API Documentation"}

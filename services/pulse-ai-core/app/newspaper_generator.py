@@ -90,13 +90,8 @@ def generate_newspaper_content():
         "secondary_stories": secondary_stories_data,
         "sidebar": sidebar_content
     }
-
-    output_path = "output/newspaper_content.json"
-    with open(output_path, "w") as f:
-        json.dump(final_content, f, indent=2)
-
-    print(f"\n✅ Successfully generated newspaper content and saved to {output_path}")
-    print(json.dumps(final_content, indent=2))
+    print("✅ Successfully generated newspaper content object.")
+    return final_content
 
 if __name__ == "__main__":
     generate_newspaper_content()
