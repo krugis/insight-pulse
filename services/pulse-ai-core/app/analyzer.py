@@ -1,59 +1,71 @@
-import os
 import pandas as pd
 from opensearchpy import OpenSearch
 import hdbscan
 import numpy as np
-from openai import OpenAI
 from datetime import datetime, timedelta
+from bertopic import BERTopic
+from sentence_transformers import SentenceTransformer
 from app.core.config import settings
 
-# --- Initialize Clients ---
-opensearch_client = OpenSearch(
+# --- Initialize Clients & Models ---
+opsearch_client = OpenSearch(
     hosts=[{'host': settings.OPENSEARCH_HOST, 'port': 9200}],
-    use_ssl=False,
-    verify_certs=False
+    use_ssl=False, verify_certs=False
 )
-openai_client = OpenAI(api_key=settings.OPENAI_API_KEY)
+# BERTopic requires the embedding model to be available
+embedding_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
 # --- Main Functions ---
-def get_recent_posts():
-    """Fetches posts from the last 24 hours from OpenSearch."""
-    print("🔍 Fetching recent posts with embeddings from OpenSearch...")
-    twenty_four_hours_ago = datetime.utcnow() - timedelta(days=1)
-    
+def get_recent_posts(days_back: int = 30):
+    """Fetches posts from the last N days from OpenSearch."""
+    print(f"🔍 Fetching posts from the last {days_back} day(s)...")
+    time_window = datetime.utcnow() - timedelta(days=days_back)
+
     query = {
         "query": {
             "bool": {
                 "must": [
                     {"exists": {"field": "content_vector"}},
-                    {"range": {"published_at": {"gte": twenty_four_hours_ago.isoformat()}}}
+                    {"range": {"published_at": {"gte": time_window.isoformat()}}}
                 ]
             }
         },
-        "size": 1000 # Get up to 1000 posts
+        "size": 1000
     }
-    
-    response = opensearch_client.search(index="posts", body=query)
+
+    response = opsearch_client.search(index="posts", body=query)
     hits = response['hits']['hits']
     print(f"📄 Found {len(hits)} posts.")
     return pd.DataFrame([h['_source'] for h in hits])
 
-def find_hot_topics(df: pd.DataFrame):
-    """Clusters posts using HDBSCAN to find topics."""
-    print("🧠 Clustering posts to find hot topics...")
+def find_hot_topics(df: pd.DataFrame, algorithm: str = "hdbscan"):
+    """Clusters posts to find topics using the specified algorithm."""
+    print(f"🧠 Clustering posts with {algorithm} to find hot topics...")
     if df.empty or 'content_vector' not in df.columns:
-        return {}
+        return None, None
 
     vectors = np.array(df['content_vector'].tolist())
-    clusterer = hdbscan.HDBSCAN(min_cluster_size=2, min_samples=1, metric='euclidean')
-    labels = clusterer.fit_predict(vectors)
-    
-    df['topic_id'] = labels
-    
+    docs = df['content'].tolist()
+
+    if algorithm == "bertopic":
+        topic_model = BERTopic(embedding_model=embedding_model, min_topic_size=2)
+        topics, _ = topic_model.fit_transform(docs, embeddings=vectors)
+        df['topic_id'] = topics
+        topic_info = topic_model.get_topic_info()
+        print(f"📊 BERTopic found {len(topic_info) - 1} potential topics.")
+    else: # Default to HDBSCAN
+        clusterer = hdbscan.HDBSCAN(min_cluster_size=2, min_samples=1, metric='euclidean')
+        labels = clusterer.fit_predict(vectors)
+        df['topic_id'] = labels
+        topic_info = None # HDBSCAN doesn't provide topic info directly
+
     # Filter out noise (-1) and group posts by topic
     topic_groups = df[df['topic_id'] != -1].groupby('topic_id')
-    print(f"📊 Found {len(topic_groups)} potential topics.")
-    return topic_groups
+
+    if not topic_info:
+         print(f"📊 HDBSCAN found {len(topic_groups)} potential topics.")
+
+    return topic_groups, topic_info
 
 # --- NEW REFACTORED FUNCTIONS ---
 def add_impact_score(df: pd.DataFrame) -> pd.DataFrame:

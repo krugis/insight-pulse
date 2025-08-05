@@ -29,7 +29,7 @@ def get_image_url(post):
     images = post.get('images')
     return images[0] if images and isinstance(images, list) and len(images) > 0 else None
 
-def generate_newspaper_content():
+def generate_newspaper_content(days_back: int = 1, algorithm: str = "hdbscan"):
     """Fetches, analyzes, and generates all content for the newspaper portal."""
     
     posts_df = get_recent_posts()
@@ -41,7 +41,7 @@ def generate_newspaper_content():
     posts_df = add_impact_score(posts_df)
 
     # --- 1. Analyze all posts first ---
-    topic_groups = find_hot_topics(posts_df)
+    topic_groups, _ = find_hot_topics(posts_df, algorithm=algorithm)
     impactful_posts = find_most_impactful_posts(posts_df, top_n=10)
 
     # --- 2. Strategically Select Posts for Each Section ---
