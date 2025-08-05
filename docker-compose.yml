@@ -47,9 +47,11 @@ services:
     environment:
       discovery.type: single-node
       OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx512m"
-      DISABLE_SECURITY_PLUGIN: "true"
+      #DISABLE_SECURITY_PLUGIN: "true"
+      path.repo: /usr/share/opensearch/snapshots
     volumes:
       - opensearch-data:/usr/share/opensearch/data
+      - /home/ipd1/opensearch_backups:/usr/share/opensearch/snapshots
     networks:
       - pulse_net
 
@@ -139,6 +141,20 @@ services:
     env_file: [./services/pulse-scheduler/.env]
     command: python -m services.pulse-scheduler.app.scheduler
     networks: [pulse_net]
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.11.0
+    container_name: opensearch-dashboards
+    ports:
+      - "5601:5601"
+    environment:
+      OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
+      OPENSEARCH_SECURITY_ENABLED: "true"
+      #DISABLE_SECURITY_DASHBOARDS_PLUGIN: "true"
+    depends_on:
+      - opensearch
+    networks:
+      - pulse_net
 
 volumes:
   opensearch-data:
